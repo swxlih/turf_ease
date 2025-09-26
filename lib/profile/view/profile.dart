@@ -29,7 +29,7 @@ class _ProfileState extends State<Profile> {
         ],
       ),
       body: Center(
-        child: Text("profile"),
+        child: Text("profile screen"),
       ),
     );
   }
