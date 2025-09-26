@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "684445430186",
+    "project_id": "turf1-bb6b5",
+    "storage_bucket": "turf1-bb6b5.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:684445430186:android:e2a46d93773f6d5a4d3bd3",
+        "android_client_info": {
+          "package_name": "com.example.medical_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAr3QbjRU-SnG8FRY1sVCVEvCSzEhoL--4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
