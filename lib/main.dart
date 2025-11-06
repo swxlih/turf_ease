@@ -1,8 +1,12 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:medical_app/Auth/login_page.dart';
+import 'package:medical_app/UserApp/provider/booking_provider.dart';
+import 'package:medical_app/UserApp/provider/user_provider.dart';
+import 'package:provider/provider.dart';
 
-void main() async{
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
   runApp(const MyApp());
@@ -13,9 +17,20 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: LoginPage(),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context) => UserProvider()),
+        ChangeNotifierProvider(create: (context) => BookingProvider()),
+      ],
+      child: ScreenUtilInit(
+        designSize:  Size(360, 804),
+        minTextAdapt: true,
+        splitScreenMode: true,
+        builder: (context, child) {
+          return MaterialApp(debugShowCheckedModeBanner: false, home: child);
+        },
+        child: LoginPage(),
+      ),
     );
   }
 }

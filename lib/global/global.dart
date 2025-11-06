@@ -1,4 +1,4 @@
- import 'package:medical_app/homepage/model/card_model.dart';
+ import 'package:medical_app/UserApp/Homepage/model/card_model.dart';
 
 List<CardModel> turflist = [
     CardModel(
@@ -56,7 +56,7 @@ List<CardModel> turflist = [
       address: "Angadippuram",
       rate: 600,
       imageUrl:
-          "https://gamebullz.com/blog/wp-content/uploads/2023/11/The-Turf-Arena-Box-cricket-and-Football-1.jpeg",
+          "https://turftown.in/_next/image?url=https%3A%2F%2Fturftown.s3.ap-south-1.amazonaws.com%2Fsuper_admin%2Ftt-1744394552699.webp&w=828&q=75",
     ),
   ];
 

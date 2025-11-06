@@ -10,6 +10,4 @@ class CardModel {
     required this.rate,
     required this.imageUrl
   });
-
-
 }

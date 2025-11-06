@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:medical_app/Auth/authservice/auth_service.dart';
 import 'package:medical_app/Registerpage/view/register_page.dart';
 
@@ -16,6 +17,10 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
+
+     
+
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: SingleChildScrollView(
@@ -24,7 +29,7 @@ class _LoginPageState extends State<LoginPage> {
           children: [
             // Top image
             Container(
-              height: 250,
+              height: 250.h,
               width: double.infinity,
               decoration: BoxDecoration(
                 // image: DecorationImage(
@@ -33,25 +38,25 @@ class _LoginPageState extends State<LoginPage> {
                 // ),
               ),
             ),
-            SizedBox(height: 15),
+            SizedBox(height: 15.h),
 
             // Title
             Center(
               child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 15),
+                padding: EdgeInsets.symmetric(horizontal: 15.w),
                 child: Text(
                   "Login",
                   textAlign: TextAlign.center,
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 26),
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 26.sp),
                 ),
               ),
             ),
 
-            SizedBox(height: 30),
+            SizedBox(height: 30.h),
 
             // Email label
             Padding(
-              padding: EdgeInsets.only(left: 15),
+              padding: EdgeInsets.only(left: 15.w),
               child: Text(
                 "Email",
                 style: TextStyle(fontWeight: FontWeight.w400),
@@ -59,9 +64,9 @@ class _LoginPageState extends State<LoginPage> {
             ),
             // Email field
             Padding(
-              padding: EdgeInsets.symmetric(horizontal: 15, vertical: 8),
+              padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 8.h),
               child: SizedBox(
-                height: 50,
+                height: 50.h,
                 width: double.infinity,
                 child: TextFormField(
                   controller: _emailController,
@@ -72,21 +77,21 @@ class _LoginPageState extends State<LoginPage> {
                     hintStyle: TextStyle(
                       color: Colors.grey,
                       fontWeight: FontWeight.w300,
-                      fontSize: 14,
+                      fontSize: 14.sp,
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderSide: BorderSide(
                         color: Color.fromARGB(255, 225, 225, 225),
-                        width: 1,
+                        width: 1.w,
                       ),
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(10).r,
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderSide: BorderSide(
                         color: Color(0xFFD4D4D4),
-                        width: 2,
+                        width: 2.w,
                       ),
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(10).r,
                     ),
                   ),
                 ),
@@ -95,7 +100,7 @@ class _LoginPageState extends State<LoginPage> {
 
             // Password label
             Padding(
-              padding: EdgeInsets.only(left: 15, top: 10),
+              padding: EdgeInsets.only(left: 15.w, top: 10.h),
               child: Text(
                 "Password",
                 style: TextStyle(fontWeight: FontWeight.w400),
@@ -103,9 +108,9 @@ class _LoginPageState extends State<LoginPage> {
             ),
             // Password field
             Padding(
-              padding: EdgeInsets.symmetric(horizontal: 15, vertical: 8),
+              padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 8.h),
               child: SizedBox(
-                height: 50,
+                height: 50.h,
                 width: double.infinity,
                 child: TextFormField(
                   controller: _passwordController,
@@ -117,28 +122,28 @@ class _LoginPageState extends State<LoginPage> {
                     hintStyle: TextStyle(
                       color: Colors.grey,
                       fontWeight: FontWeight.w300,
-                      fontSize: 14,
+                      fontSize: 14.sp,
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderSide: BorderSide(
                         color: Color.fromARGB(255, 225, 225, 225),
-                        width: 1,
+                        width: 1.w,
                       ),
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(10).r,
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderSide: BorderSide(
                         color: Color(0xFFD4D4D4),
-                        width: 2,
+                        width: 2.w,
                       ),
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(10).r,
                     ),
                   ),
                 ),
               ),
             ),
 
-            SizedBox(height: 40),
+            SizedBox(height: 40.h),
 
             // Login button
             Center(
@@ -147,11 +152,11 @@ class _LoginPageState extends State<LoginPage> {
                  await authSrevice.loginUser(emailController: _emailController.text, passwordController: _passwordController.text, context: context);
                 },
                 child: Container(
-                  height: 50,
-                  width: 350,
+                  height: 50.h,
+                  width: 350.w,
                   decoration: BoxDecoration(
                     color: Color.fromARGB(255, 5, 90, 8),
-                    borderRadius: BorderRadius.circular(15),
+                    borderRadius: BorderRadius.circular(15).r,
                   ),
                   child: Center(
                     child: Text(
@@ -166,7 +171,7 @@ class _LoginPageState extends State<LoginPage> {
               ),
             ),
 
-            SizedBox(height: 20),
+            SizedBox(height: 20.h),
 
             // Register redirect
             Center(
@@ -189,7 +194,7 @@ class _LoginPageState extends State<LoginPage> {
                 ],
               ),
             ),
-            SizedBox(height: 40),
+            SizedBox(height: 40.h),
           ],
         ),
       ),

@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:medical_app/Booking/view/booking.dart';
-import 'package:medical_app/homepage/view/home_page.dart';
-import 'package:medical_app/notifications/notifications.dart';
-import 'package:medical_app/profile/view/profile.dart';
-
-
-
+import 'package:medical_app/UserApp/Booking/view/booking.dart';
+import 'package:medical_app/UserApp/Homepage/view/home_page.dart';
+import 'package:medical_app/UserApp/ProfilePage/view/profile.dart';
+import 'package:medical_app/UserApp/notifications/view/notifications.dart';
 
 class BottomNav extends StatefulWidget {
   const BottomNav({super.key});
@@ -15,43 +12,34 @@ class BottomNav extends StatefulWidget {
 }
 
 class _BottomNavState extends State<BottomNav> {
+  int _selectedIndex = 0;
 
-  int _selectedIndex=0;
-  
-
-  ontap(index){
+  ontap(index) {
     setState(() {
-      _selectedIndex=index;
+      _selectedIndex = index;
     });
   }
- List<Widget> get screens => [
-        HomePage(
-          
-        ),
-        Booking(),
-        Notifications(),
-        Profile()
-        
-      ];  
 
-  @override 
+  List<Widget> get screens => [
+    HomePage(),
+    UserBookingsPage(),
+    Notifications(),
+    ProfileSettingsPage(),
+  ];
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-
-      body:screens[_selectedIndex] ,
+      body: screens[_selectedIndex],
 
       bottomNavigationBar: BottomNavigationBar(
-        
         currentIndex: _selectedIndex,
         onTap: (value) {
           ontap(value);
         },
-        
+
         items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
           BottomNavigationBarItem(
             icon: Icon(Icons.date_range),
             label: 'Booking',
@@ -64,18 +52,13 @@ class _BottomNavState extends State<BottomNav> {
             icon: Icon(Icons.person_outline_outlined),
             label: 'Profile',
           ),
-         
         ],
-        selectedItemColor:Colors.white,
+        selectedItemColor: Colors.white,
         unselectedItemColor: const Color.fromARGB(255, 12, 12, 12),
-        showUnselectedLabels:true,
+        showUnselectedLabels: true,
         backgroundColor: Colors.green.shade100,
         type: BottomNavigationBarType.fixed,
-
-        
       ),
     );
   }
-
-  
 }
