@@ -31,12 +31,9 @@ class _LoginPageState extends State<LoginPage> {
             Container(
               height: 250.h,
               width: double.infinity,
-              decoration: BoxDecoration(
-                // image: DecorationImage(
-                //   // image: AssetImage("assets/images/football.jpg"),
-                //   // fit: BoxFit.cover,
-                // ),
-              ),
+             
+
+              child: Image.asset("assets/images/soccer.png",fit: BoxFit.cover,height: 250.h,),
             ),
             SizedBox(height: 15.h),
 
