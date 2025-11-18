@@ -1,10 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:medical_app/Admin/addtournament/tournament_page.dart';
 import 'package:medical_app/Auth/login_page.dart';
 
 class AdminProfile extends StatefulWidget {
-  const AdminProfile({super.key});
+  const AdminProfile({super.key});            
 
   @override
   State<AdminProfile> createState() => _AdminProfileState();
@@ -20,7 +21,7 @@ class _AdminProfileState extends State<AdminProfile> {
   bool isLoading = true;
 
   @override
-  void initState() {
+  void initState() { 
     super.initState();
     fetchAdminDetails();
   }
@@ -151,7 +152,26 @@ class _AdminProfileState extends State<AdminProfile> {
                       infoTile(
                           icon: Icons.home,
                           title: "Address",
-                          value: userData!['address'] ?? 'N/A'),
+                          value: userData!['address'] ?? 'N/A'
+                          ),
+
+                          InkWell(
+      onTap: () {
+        Navigator.push(context, MaterialPageRoute(builder: (context) => TournamentPage(),));
+      },
+      child: Card(
+        margin: const EdgeInsets.symmetric(vertical: 6),
+        elevation: 1.5,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        child: ListTile(
+          leading: Icon(Icons.add, color: Colors.blue),
+          title: Text("Add Tournaments",
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+          
+        ),
+      ),
+    ),
+                      
 
                       const SizedBox(height: 25),
 
@@ -237,17 +257,21 @@ class _AdminProfileState extends State<AdminProfile> {
   Widget infoTile({
     required IconData icon,
     required String title,
-    required String value,
+    Function()? onTap,
+   String? value,
   }) {
-    return Card(
-      margin: const EdgeInsets.symmetric(vertical: 6),
-      elevation: 1.5,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      child: ListTile(
-        leading: Icon(icon, color: Colors.blue),
-        title: Text(title,
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-        subtitle: Text(value, style: const TextStyle(fontSize: 15)),
+    return InkWell(
+      onTap: onTap,
+      child: Card(
+        margin: const EdgeInsets.symmetric(vertical: 6),
+        elevation: 1.5,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        child: ListTile(
+          leading: Icon(icon, color: Colors.blue),
+          title: Text(title,
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+          subtitle: Text(value!, style: const TextStyle(fontSize: 15)),
+        ),
       ),
     );
   }

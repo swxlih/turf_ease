@@ -258,6 +258,8 @@ class _HomePageState extends State<HomePage> {
                                             children: [
                                               Expanded(
                                                 child: Text(
+                                                  maxLines: 1,
+                                                  overflow: TextOverflow.ellipsis,
                                                   turf['turfname'] ?? 'Unknown',
                                                   style:  TextStyle(
                                                     fontSize: 14.sp,

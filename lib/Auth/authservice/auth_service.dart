@@ -1,7 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:medical_app/Admin/Bottomnav/view/admin_botomnav.dart';
+import 'package:medical_app/Auth/authservice/fsm.dart';
 import 'package:medical_app/Auth/login_page.dart';
 import 'package:medical_app/Auth/model/usermodel.dart';
 import 'package:medical_app/UserApp/Bottomnav/view/bottomnav.dart';
@@ -40,9 +42,10 @@ class AuthService extends ChangeNotifier {
                   "morningRate": data.morningRate,
                   "eveningRate": data.eveningRate,
                   "citylist": generatePrefixes(data.city ?? 'N/A'),
-                  "address": data.address,
+                  "address": data.address,                
                   "turfimage": data.turfimage,
                   "createdAt": Timestamp.now(),
+                  "fcmToken":"",
                   if (data.role == 'turfowner')
                     "features": {
                       "bathroom": false,
@@ -90,9 +93,17 @@ class AuthService extends ChangeNotifier {
         password: passwordController.trim(),
       );
 
+      
+     await NotificationService().updateFcmTokenAfterLogin();
+
+     // Subscribe to topic (VERY IMPORTANT)
+     await FirebaseMessaging.instance.subscribeToTopic("all_users");   
+     print("📌 User subscribed to all_users topic");
+    
+
       User? user = userCredential.user;
 
-      if (user != null) {
+      if (user != null) { 
         // Check in "users" collection
         DocumentSnapshot userDoc =
             await _firestore.collection('Users').doc(user.uid).get();
