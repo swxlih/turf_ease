@@ -186,122 +186,130 @@ class _HomePageState extends State<HomePage> {
                       ? const Center(child: CircularProgressIndicator())
                       : Padding(
                         padding:  EdgeInsets.symmetric(horizontal: 16.w),
-                        child: GridView.builder(
-                          itemCount: filteredTurfs.length,
-                          gridDelegate:
-                               SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: 2,
-                                crossAxisSpacing: 20.w,
-                                mainAxisSpacing: 20.h,
-                                childAspectRatio: 0.9,
-                              ),
-                          itemBuilder: (context, index) {
-                            final turf = filteredTurfs[index];
-                            final moringrupees = turf['morningRate']?.toString() ?? 'N/A';
-                            final eveningrupees = turf['eveningRate']?.toString() ?? 'N/A';
-
-                            return InkWell(
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder:
-                                        (context) => TurfDetailPage(
-                                          turfname:
-                                              turf['turfname'] ?? 'Unknown',
-                                          imageUrl: turf['turfimage'] ?? '',
-                                          morningruppes: moringrupees,
-                                          eveningrupees: eveningrupees,
-                                          ownerUid: turf['uid'] ?? '',
-                                          address: turf['address'],
-                                          city: turf['city'],
+                        child: StreamBuilder(
+                          stream: FirebaseFirestore.instance
+              .collection('Users')
+              .where('role', isEqualTo: 'turfowner').snapshots(),
+                          builder: (context, asyncSnapshot) {
+                            fetchTurfs();
+                            return GridView.builder(
+                              itemCount: filteredTurfs.length,
+                              gridDelegate:
+                                   SliverGridDelegateWithFixedCrossAxisCount(
+                                    crossAxisCount: 2,
+                                    crossAxisSpacing: 20.w,
+                                    mainAxisSpacing: 20.h,
+                                    childAspectRatio: 0.9,
+                                  ),
+                              itemBuilder: (context, index) {
+                                final turf = filteredTurfs[index];
+                                final moringrupees = turf['morningRate']?.toString() ?? 'N/A';
+                                final eveningrupees = turf['eveningRate']?.toString() ?? 'N/A';
+                            
+                                return InkWell(
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder:
+                                            (context) => TurfDetailPage(
+                                              turfname:
+                                                  turf['turfname'] ?? 'Unknown',
+                                              imageUrl: turf['turfimage'] ?? '',
+                                              morningruppes: moringrupees,
+                                              eveningrupees: eveningrupees,
+                                              ownerUid: turf['uid'] ?? '',
+                                              address: turf['address'],
+                                              city: turf['city'],
+                                            ),
+                                      ),
+                                    );
+                                  },
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(16).r,
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black12,
+                                          blurRadius: 3.r,
+                                          offset:  Offset(3.w, 7.h),
                                         ),
+                                      ],
+                                    ),
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        ClipRRect(
+                                          borderRadius:  BorderRadius.vertical(
+                                            top: Radius.circular(16).r,
+                                          ),
+                                          child: Image.network(
+                                            turf['turfimage'] ?? '',
+                                            height: 100.h,
+                                            width: double.infinity,
+                                            fit: BoxFit.cover,
+                                            errorBuilder:
+                                                (context, error, stackTrace) =>
+                                                    const Icon(Icons.broken_image),
+                                          ),
+                                        ),
+                                        Padding(
+                                          padding:  EdgeInsets.all(8.w),
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Row(
+                                                children: [
+                                                  Expanded(
+                                                    child: Text(
+                                                      maxLines: 1,
+                                                      overflow: TextOverflow.ellipsis,
+                                                      turf['turfname'] ?? 'Unknown',
+                                                      style:  TextStyle(
+                                                        fontSize: 14.sp,
+                                                        fontWeight: FontWeight.bold,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                   Icon(
+                                                    Icons.favorite_border,
+                                                    size: 16.sp,
+                                                  ),
+                                                ],
+                                              ),
+                                              Row(
+                                                children: [
+                                                  Expanded(
+                                                    child: Text(
+                                                      turf['city'] ?? 'No city',
+                                                      style:  TextStyle(
+                                                        fontSize: 12.sp,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                   Icon(
+                                                    Icons.star,
+                                                    size: 16.sp,
+                                                    color: Colors.amberAccent,
+                                                  ),
+                                                   Text(
+                                                    "4.1",
+                                                    style: TextStyle(fontSize: 12.sp),
+                                                  ),
+                                                ],
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
                                   ),
                                 );
                               },
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(16).r,
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black12,
-                                      blurRadius: 3.r,
-                                      offset:  Offset(3.w, 7.h),
-                                    ),
-                                  ],
-                                ),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    ClipRRect(
-                                      borderRadius:  BorderRadius.vertical(
-                                        top: Radius.circular(16).r,
-                                      ),
-                                      child: Image.network(
-                                        turf['turfimage'] ?? '',
-                                        height: 100.h,
-                                        width: double.infinity,
-                                        fit: BoxFit.cover,
-                                        errorBuilder:
-                                            (context, error, stackTrace) =>
-                                                const Icon(Icons.broken_image),
-                                      ),
-                                    ),
-                                    Padding(
-                                      padding:  EdgeInsets.all(8.w),
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Row(
-                                            children: [
-                                              Expanded(
-                                                child: Text(
-                                                  maxLines: 1,
-                                                  overflow: TextOverflow.ellipsis,
-                                                  turf['turfname'] ?? 'Unknown',
-                                                  style:  TextStyle(
-                                                    fontSize: 14.sp,
-                                                    fontWeight: FontWeight.bold,
-                                                  ),
-                                                ),
-                                              ),
-                                               Icon(
-                                                Icons.favorite_border,
-                                                size: 16.sp,
-                                              ),
-                                            ],
-                                          ),
-                                          Row(
-                                            children: [
-                                              Expanded(
-                                                child: Text(
-                                                  turf['city'] ?? 'No city',
-                                                  style:  TextStyle(
-                                                    fontSize: 12.sp,
-                                                  ),
-                                                ),
-                                              ),
-                                               Icon(
-                                                Icons.star,
-                                                size: 16.sp,
-                                                color: Colors.amberAccent,
-                                              ),
-                                               Text(
-                                                "4.1",
-                                                style: TextStyle(fontSize: 12.sp),
-                                              ),
-                                            ],
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
                             );
-                          },
+                          }
                         ),
                       ),
             ),

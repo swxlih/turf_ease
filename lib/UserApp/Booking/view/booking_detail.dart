@@ -112,6 +112,8 @@ class BookingDetailsPage extends StatelessWidget {
                 ],
               ),
             ),
+
+            // RatingBar(ratingWidget: RatingWidget(full: Icon(Icons.star,color: Colors.amber,), half: , empty: Icon(Icons.)), onRatingUpdate: onRatingUpdate)
           ],
         ),
       ),

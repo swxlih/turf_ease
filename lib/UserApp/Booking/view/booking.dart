@@ -106,6 +106,7 @@ class _UserBookingsPageState extends State<UserBookingsPage> {
                       children: [
                         Container(
                           width: 90.w,
+                          height: 118.h,
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.only(
                               topLeft: Radius.circular(12.r),
@@ -115,7 +116,7 @@ class _UserBookingsPageState extends State<UserBookingsPage> {
                             color: Colors.grey[200],
 
                           ),
-                          child:Image.network(booking['turfimage'])
+                          child:Image.network(booking['turfimage'],fit: BoxFit.cover,)
                               
                         ),
                   

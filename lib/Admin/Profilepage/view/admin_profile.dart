@@ -5,7 +5,7 @@ import 'package:medical_app/Admin/addtournament/tournament_page.dart';
 import 'package:medical_app/Auth/login_page.dart';
 
 class AdminProfile extends StatefulWidget {
-  const AdminProfile({super.key});            
+  const AdminProfile({super.key});
 
   @override
   State<AdminProfile> createState() => _AdminProfileState();
@@ -21,7 +21,7 @@ class _AdminProfileState extends State<AdminProfile> {
   bool isLoading = true;
 
   @override
-  void initState() { 
+  void initState() {
     super.initState();
     fetchAdminDetails();
   }
@@ -96,161 +96,192 @@ class _AdminProfileState extends State<AdminProfile> {
         title: const Text("Profile"),
         centerTitle: true,
       ),
-      body: isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : userData == null
+      body:
+          isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : userData == null
               ? const Center(child: Text("No user data found"))
               : SingleChildScrollView(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      // ✅ Turf Image
-                      CircleAvatar(
-                        radius: 60,
-                        backgroundImage: userData!['turfimage'] != null &&
-                                userData!['turfimage'].toString().isNotEmpty
-                            ? NetworkImage(userData!['turfimage'])
-                            : const NetworkImage(
-                                "https://cdn-icons-png.flaticon.com/512/149/149071.png"),
-                      ),
-                      const SizedBox(height: 12),
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    // ✅ Turf Image
+                    CircleAvatar(
+                      radius: 60,
+                      backgroundImage:
+                          userData!['turfimage'] != null &&
+                                  userData!['turfimage'].toString().isNotEmpty
+                              ? NetworkImage(userData!['turfimage'])
+                              : const NetworkImage(
+                                "https://cdn-icons-png.flaticon.com/512/149/149071.png",
+                              ),
+                    ),
+                    const SizedBox(height: 12),
 
-                      // ✅ Turf Name
-                      Text(
-                        userData!['turfname'] ?? "No Turf Name",
-                        style: const TextStyle(
-                            fontSize: 22, fontWeight: FontWeight.bold),
+                    // ✅ Turf Name
+                    Text(
+                      userData!['turfname'] ?? "No Turf Name",
+                      style: const TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
                       ),
-                      const SizedBox(height: 4),
+                    ),
+                    const SizedBox(height: 4),
 
-                      // ✅ Owner Name
-                      Text(
-                        "Owner: ${userData!['name'] ?? 'No Name'}",
-                        style:
-                            const TextStyle(fontSize: 16, color: Colors.grey),
-                      ),
-                      const SizedBox(height: 20),
+                    // ✅ Owner Name
+                    Text(
+                      "Owner: ${userData!['name'] ?? 'No Name'}",
+                      style: const TextStyle(fontSize: 16, color: Colors.grey),
+                    ),
+                    const SizedBox(height: 20),
 
-                      // ✅ Info Cards
-                      infoTile(
-                          icon: Icons.email,
-                          title: "Email",
-                          value: userData!['email'] ?? 'N/A'),
-                      infoTile(
-                          icon: Icons.phone,
-                          title: "Phone",
-                          value: userData!['number'] ?? 'N/A'),
-                      infoTile(
-                          icon: Icons.location_city,
-                          title: "City",
-                          value: userData!['city'] ?? 'N/A'),
-                      infoTile(
-                          icon: Icons.attach_money,
-                          title: "Rate Per Hour",
-                          value: "₹ ${userData!['rateperhour'] ?? 'N/A'}"),
-                      infoTile(
-                          icon: Icons.home,
-                          title: "Address",
-                          value: userData!['address'] ?? 'N/A'
+                    // ✅ Info Cards
+                    infoTile(
+                      icon: Icons.email,
+                      title: "Email",
+                      value: userData!['email'] ?? 'N/A',
+                    ),
+                    infoTile(
+                      icon: Icons.phone,
+                      title: "Phone",
+                      value: userData!['number'] ?? 'N/A',
+                    ),
+                    infoTile(
+                      icon: Icons.location_city,
+                      title: "City",
+                      value: userData!['city'] ?? 'N/A',
+                    ),
+                    infoTile(
+                      icon: Icons.attach_money,
+                      title: "Morning Rate",
+                      value: "₹ ${userData!['morningRate'] ?? 'N/A'}",
+                    ),
+                    infoTile(
+                      icon: Icons.attach_money,
+                      title: "Evening Rate",
+                      value: "₹ ${userData!['eveningRate'] ?? 'N/A'}",
+                    ),
+                    infoTile(
+                      icon: Icons.home,
+                      title: "Address",
+                      value: userData!['address'] ?? 'N/A',
+                    ),
+
+                    InkWell(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => TournamentPage(),
                           ),
-
-                          InkWell(
-      onTap: () {
-        Navigator.push(context, MaterialPageRoute(builder: (context) => TournamentPage(),));
-      },
-      child: Card(
-        margin: const EdgeInsets.symmetric(vertical: 6),
-        elevation: 1.5,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        child: ListTile(
-          leading: Icon(Icons.add, color: Colors.blue),
-          title: Text("Add Tournaments",
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-          
-        ),
-      ),
-    ),
-                      
-
-                      const SizedBox(height: 25),
-
-                      // ✅ Features Section
-                      const Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          "Features",
-                          style: TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.bold),
+                        );
+                      },
+                      child: Card(
+                        margin: const EdgeInsets.symmetric(vertical: 6),
+                        elevation: 1.5,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: ListTile(
+                          leading: Icon(Icons.add, color: Colors.blue),
+                          title: Text(
+                            "Add Tournaments",
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
+                          ),
                         ),
                       ),
-                      const SizedBox(height: 10),
-                      ...features.keys.map((key) {
-                        return CheckboxListTile(
-                          title: Text(key),
-                          value: features[key],
-                          onChanged: (val) {
-                            if (val != null) {
-                              setState(() => features[key] = val);
-                              updateFeature(key, val);
-                            }
-                          },
-                        );
-                      }).toList(),
+                    ),
 
-                      const SizedBox(height: 20),
+                    const SizedBox(height: 25),
 
-                      // ✅ Game Categories Section
-                      const Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          "Game Categories",
-                          style: TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.bold),
+                    // ✅ Features Section
+                    const Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        "Features",
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
-                      const SizedBox(height: 10),
-                      ...gameCategories.keys.map((key) {
-                        return CheckboxListTile(
-                          title: Text(key),
-                          value: gameCategories[key],
-                          onChanged: (val) {
-                            if (val != null) {
-                              setState(() => gameCategories[key] = val);
-                              updateGameCategory(key, val);
-                            }
-                          },
-                        );
-                      }).toList(),
-
-                      const SizedBox(height: 30),
-
-                      // ✅ Logout Button
-                      ElevatedButton.icon(
-                        onPressed: () async {
-                          await _auth.signOut();
-                          if (context.mounted) {
-                            Navigator.pushAndRemoveUntil(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => const LoginPage()),
-                              (route) => false,
-                            );
+                    ),
+                    const SizedBox(height: 10),
+                    ...features.keys.map((key) {
+                      return CheckboxListTile(
+                        title: Text(key),
+                        value: features[key],
+                        onChanged: (val) {
+                          if (val != null) {
+                            setState(() => features[key] = val);
+                            updateFeature(key, val);
                           }
                         },
-                        icon: const Icon(Icons.logout),
-                        label: const Text("Logout"),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.redAccent,
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 40, vertical: 12),
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10)),
+                      );
+                    }).toList(),
+
+                    const SizedBox(height: 20),
+
+                    // ✅ Game Categories Section
+                    const Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        "Game Categories",
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+                    const SizedBox(height: 10),
+                    ...gameCategories.keys.map((key) {
+                      return CheckboxListTile(
+                        title: Text(key),
+                        value: gameCategories[key],
+                        onChanged: (val) {
+                          if (val != null) {
+                            setState(() => gameCategories[key] = val);
+                            updateGameCategory(key, val);
+                          }
+                        },
+                      );
+                    }).toList(),
+
+                    const SizedBox(height: 30),
+
+                    // ✅ Logout Button
+                    ElevatedButton.icon(
+                      onPressed: () async {
+                        await _auth.signOut();
+                        if (context.mounted) {
+                          Navigator.pushAndRemoveUntil(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const LoginPage(),
+                            ),
+                            (route) => false,
+                          );
+                        }
+                      },
+                      icon: const Icon(Icons.logout),
+                      label: const Text("Logout"),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.redAccent,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 40,
+                          vertical: 12,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
+              ),
     );
   }
 
@@ -258,7 +289,7 @@ class _AdminProfileState extends State<AdminProfile> {
     required IconData icon,
     required String title,
     Function()? onTap,
-   String? value,
+    String? value,
   }) {
     return InkWell(
       onTap: onTap,
@@ -268,8 +299,10 @@ class _AdminProfileState extends State<AdminProfile> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         child: ListTile(
           leading: Icon(icon, color: Colors.blue),
-          title: Text(title,
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+          title: Text(
+            title,
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+          ),
           subtitle: Text(value!, style: const TextStyle(fontSize: 15)),
         ),
       ),

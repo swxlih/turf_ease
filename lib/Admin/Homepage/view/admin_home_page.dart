@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
+import 'package:medical_app/Admin/Homepage/view/userbooking_detail.dart';
 
 class AdminHomePage extends StatefulWidget {
   const AdminHomePage({super.key});
@@ -14,6 +15,7 @@ class AdminHomePage extends StatefulWidget {
 class _AdminHomePageState extends State<AdminHomePage> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  int selectedtab = 0;
 
   Stream<QuerySnapshot> getadminBookings() {
     final user = _auth.currentUser;
@@ -26,6 +28,32 @@ class _AdminHomePageState extends State<AdminHomePage> {
         .doc(user.uid)
         .collection('bookings')
         .snapshots();
+  }
+
+  Widget _filterTab(String label, int index) {
+    final bool isSelected = selectedtab == index;
+
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          selectedtab = index;
+        });
+      },
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+        decoration: BoxDecoration(
+          color: isSelected ? Colors.green : Colors.grey.shade300,
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: isSelected ? Colors.white : Colors.black,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ),
+    );
   }
 
   @override
@@ -55,10 +83,7 @@ class _AdminHomePageState extends State<AdminHomePage> {
               return Center(
                 child: Text(
                   "No bookings found 😔",
-                  style: TextStyle(
-                    fontSize: 16.sp,
-                    color: Colors.grey[600],
-                  ),
+                  style: TextStyle(fontSize: 16.sp, color: Colors.grey[600]),
                 ),
               );
             }
@@ -69,19 +94,43 @@ class _AdminHomePageState extends State<AdminHomePage> {
             final totalCount = bookings.length;
             final now = DateTime.now();
 
+            List<QueryDocumentSnapshot> pending = [];
+            List<QueryDocumentSnapshot> finished = [];
+            List<QueryDocumentSnapshot> displayList;
+
             int upcomingCount = 0;
             int finishedCount = 0;
 
+           
+
             for (var doc in bookings) {
               final data = doc.data() as Map<String, dynamic>;
-              if (data["date"] is Timestamp) {
-                final date = (data["date"] as Timestamp).toDate();
-                if (date.isAfter(now)) {
-                  upcomingCount++;
-                } else {
-                  finishedCount++;
-                }
+              List slots = data["slots"];
+              // sort slots by endTime
+              slots.sort(
+                (a, b) => (a["endTime"] as Timestamp).compareTo(
+                  b["endTime"] as Timestamp,
+                ),
+              );
+
+              // last slot = end of booking time
+              final lastSlot = slots.last;
+              final endTime = (lastSlot["endTime"] as Timestamp).toDate();
+
+              if (endTime.isBefore(now)) {
+                finished.add(doc);
+              } else {
+                upcomingCount++;
+                pending.add(doc);
               }
+            }
+
+             if (selectedtab == 0) {
+              displayList = bookings;
+            } else if (selectedtab == 1) {
+              displayList = pending;
+            } else {
+              displayList = finished;
             }
 
             return Column(
@@ -92,85 +141,137 @@ class _AdminHomePageState extends State<AdminHomePage> {
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     _buildSummaryCard("Total", totalCount, Icons.list_alt),
-                    _buildSummaryCard("Upcoming", upcomingCount, Icons.calendar_today),
-                    _buildSummaryCard("Finished", finishedCount, Icons.check_circle),
+                    _buildSummaryCard(
+                      "Upcoming",
+                      upcomingCount,
+                      Icons.calendar_today,
+                    ),
+                    _buildSummaryCard(
+                      "Finished",
+                      finishedCount,
+                      Icons.check_circle,
+                    ),
                   ],
                 ),
 
+                SizedBox(height: 30.h,),
+
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    _filterTab("All", 0),
+                    _filterTab("Pending", 1),
+                    _filterTab("Finished", 2),
+                  ],
+                ),
+                SizedBox(height: 20),
+
                 SizedBox(height: 25.h),
-                Text(
-                  "All Bookings",
-                  style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
-                ),
-                SizedBox(height: 10.h),
+
+                // All Bookings
+               
 
                 ListView.builder(
-                  itemCount: bookings.length,
+                  itemCount: displayList.length,
                   physics: const NeverScrollableScrollPhysics(),
                   shrinkWrap: true,
                   itemBuilder: (context, index) {
-                    final booking = bookings[index];
+                    final booking = displayList[index];
                     final dateField = booking["date"];
                     String formattedDate = "";
 
                     if (dateField is Timestamp) {
                       final dateTime = dateField.toDate();
-                      formattedDate = DateFormat('MMMM d, yyyy').format(dateTime);
+                      formattedDate = DateFormat(
+                        'MMMM d, yyyy',
+                      ).format(dateTime);
                     }
 
-                    return Card(
-                      margin: EdgeInsets.symmetric(vertical: 6.h),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12.r),
-                      ),
-                      child: ListTile(
-                        leading: const Icon(Icons.sports_soccer, color: Colors.green),
-                        title: Text(
-                          booking['username'],
-                          style: const TextStyle(fontWeight: FontWeight.bold),
+                    return GestureDetector(
+                      onTap: () {
+                        List<Map<String, dynamic>> slotList =
+                            (booking['slots'] as List<dynamic>)
+                                .map((e) => Map<String, dynamic>.from(e))
+                                .toList();
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder:
+                                (context) => UserbookingDetail(
+                                  turfName: booking['turfname'],
+                                  turfImage: booking['turfimage'],
+                                  date: formattedDate,
+                                  rate: booking['rate'],
+                                  paymentId: booking['paymentId'],
+                                  status: booking['status'],
+                                  userName: booking['username'],
+                                  userNumber: booking['usernumber'],
+                                  slots: slotList,
+                                ),
+                          ),
+                        );
+                      },
+                      child: Card(
+                        margin: EdgeInsets.symmetric(vertical: 6.h),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12.r),
                         ),
-                        subtitle: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              formattedDate,
-                              style: TextStyle(
-                                fontSize: 13.sp,
-                                color: Colors.grey[700],
+                        child: ListTile(
+                          leading: const Icon(
+                            Icons.sports_soccer,
+                            color: Colors.green,
+                          ),
+                          title: Text(
+                            booking['username'],
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                formattedDate,
+                                style: TextStyle(
+                                  fontSize: 13.sp,
+                                  color: Colors.grey[700],
+                                ),
                               ),
-                            ),
-                            SizedBox(height: 4.h),
-                            if (booking["slots"] != null &&
-                                (booking["slots"] as List).isNotEmpty)
-                              ...List.generate(
-                                (booking["slots"] as List).length,
-                                (i) {
-                                  final slot = booking["slots"][i];
-                                  return Row(
-                                    children: [
-                                      const Icon(Icons.access_time,
-                                          size: 14, color: Colors.green),
-                                      SizedBox(width: 5.w),
-                                      Text(
-                                        slot["slot"] ?? "",
-                                        style: TextStyle(
-                                          fontSize: 13.sp,
-                                          color: Colors.grey[600],
+                              SizedBox(height: 4.h),
+                              if (booking["slots"] != null &&
+                                  (booking["slots"] as List).isNotEmpty)
+                                ...List.generate(
+                                  (booking["slots"] as List).length,
+                                  (i) {
+                                    final slot = booking["slots"][i];
+                                    return Row(
+                                      children: [
+                                        const Icon(
+                                          Icons.access_time,
+                                          size: 14,
+                                          color: Colors.green,
                                         ),
-                                      ),
-                                    ],
-                                  );
-                                },
-                              ),
-                          ],
-                        ),
-                        trailing: Text(
-                          booking['status'],
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: booking['status'] == 'booked'
-                                ? Colors.green
-                                : Colors.red,
+                                        SizedBox(width: 5.w),
+                                        Text(
+                                          slot["slot"] ?? "",
+                                          style: TextStyle(
+                                            fontSize: 13.sp,
+                                            color: Colors.grey[600],
+                                          ),
+                                        ),
+                                      ],
+                                    );
+                                  },
+                                ),
+                            ],
+                          ),
+                          trailing: Text(
+                            booking['status'],
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color:
+                                  booking['status'] == 'booked'
+                                      ? Colors.green
+                                      : Colors.red,
+                            ),
                           ),
                         ),
                       ),
@@ -178,87 +279,192 @@ class _AdminHomePageState extends State<AdminHomePage> {
                   },
                 ),
 
-                SizedBox(height: 20.h,),
+                SizedBox(height: 20.h),
 
-                Text(
-                  "Pending",
-                  style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
-                ),
-                SizedBox(height: 10.h),
+                // Text(
+                //   "Pending",
+                //   style: TextStyle(
+                //     fontSize: 18.sp,
+                //     fontWeight: FontWeight.bold,
+                //   ),
+                // ),
+                // SizedBox(height: 10.h),
 
-                ListView.builder(
-                  itemCount: bookings.length,
-                  physics: const NeverScrollableScrollPhysics(),
-                  shrinkWrap: true,
-                  itemBuilder: (context, index) {
-                    final booking = bookings[index];
-                    final dateField = booking["date"];
-                    String formattedDate = "";
+                // ListView.builder(
+                //   itemCount: pending.length,
+                //   physics: const NeverScrollableScrollPhysics(),
+                //   shrinkWrap: true,
+                //   itemBuilder: (context, index) {
+                //     final booking = pending[index];
+                //     final dateField = booking["date"];
+                //     String formattedDate = "";
 
-                    if (dateField is Timestamp) {
-                      final dateTime = dateField.toDate();
-                      formattedDate = DateFormat('MMMM d, yyyy').format(dateTime);
-                    }
+                //     if (dateField is Timestamp) {
+                //       final dateTime = dateField.toDate();
+                //       formattedDate = DateFormat(
+                //         'MMMM d, yyyy',
+                //       ).format(dateTime);
+                //     }
 
-                    return Card(
-                      margin: EdgeInsets.symmetric(vertical: 6.h),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12.r),
-                      ),
-                      child: ListTile(
-                        leading: const Icon(Icons.sports_soccer, color: Colors.green),
-                        title: Text(
-                          booking['username'],
-                          style: const TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        subtitle: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              formattedDate,
-                              style: TextStyle(
-                                fontSize: 13.sp,
-                                color: Colors.grey[700],
-                              ),
-                            ),
-                            SizedBox(height: 4.h),
-                            if (booking["slots"] != null &&
-                                (booking["slots"] as List).isNotEmpty)
-                              ...List.generate(
-                                (booking["slots"] as List).length,
-                                (i) {
-                                  final slot = booking["slots"][i];
-                                  return Row(
-                                    children: [
-                                      const Icon(Icons.access_time,
-                                          size: 14, color: Colors.green),
-                                      SizedBox(width: 5.w),
-                                      Text(
-                                        slot["slot"] ?? "",
-                                        style: TextStyle(
-                                          fontSize: 13.sp,
-                                          color: Colors.grey[600],
-                                        ),
-                                      ),
-                                    ],
-                                  );
-                                },
-                              ),
-                          ],
-                        ),
-                        trailing: Text(
-                          booking['status'],
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: booking['status'] == 'booked'
-                                ? Colors.green
-                                : Colors.red,
-                          ),
-                        ),
-                      ),
-                    );
-                  },
-                ),
+                //     return Card(
+                //       margin: EdgeInsets.symmetric(vertical: 6.h),
+                //       shape: RoundedRectangleBorder(
+                //         borderRadius: BorderRadius.circular(12.r),
+                //       ),
+                //       child: ListTile(
+                //         leading: const Icon(
+                //           Icons.sports_soccer,
+                //           color: Colors.green,
+                //         ),
+                //         title: Text(
+                //           booking['username'],
+                //           style: const TextStyle(fontWeight: FontWeight.bold),
+                //         ),
+                //         subtitle: Column(
+                //           crossAxisAlignment: CrossAxisAlignment.start,
+                //           children: [
+                //             Text(
+                //               formattedDate,
+                //               style: TextStyle(
+                //                 fontSize: 13.sp,
+                //                 color: Colors.grey[700],
+                //               ),
+                //             ),
+                //             SizedBox(height: 4.h),
+                //             if (booking["slots"] != null &&
+                //                 (booking["slots"] as List).isNotEmpty)
+                //               ...List.generate(
+                //                 (booking["slots"] as List).length,
+                //                 (i) {
+                //                   final slot = booking["slots"][i];
+                //                   return Row(
+                //                     children: [
+                //                       const Icon(
+                //                         Icons.access_time,
+                //                         size: 14,
+                //                         color: Colors.green,
+                //                       ),
+                //                       SizedBox(width: 5.w),
+                //                       Text(
+                //                         slot["slot"] ?? "",
+                //                         style: TextStyle(
+                //                           fontSize: 13.sp,
+                //                           color: Colors.grey[600],
+                //                         ),
+                //                       ),
+                //                     ],
+                //                   );
+                //                 },
+                //               ),
+                //           ],
+                //         ),
+                //         trailing: Text(
+                //           booking['status'],
+                //           style: TextStyle(
+                //             fontWeight: FontWeight.bold,
+                //             color:
+                //                 booking['status'] == 'booked'
+                //                     ? Colors.green
+                //                     : Colors.red,
+                //           ),
+                //         ),
+                //       ),
+                //     );
+                //   },
+                // ),
+                // SizedBox(height: 20.h),
+
+                // Text(
+                //   "Finished",
+                //   style: TextStyle(
+                //     fontSize: 18.sp,
+                //     fontWeight: FontWeight.bold,
+                //   ),
+                // ),
+                // SizedBox(height: 10.h),
+
+                // ListView.builder(
+                //   itemCount: finished.length,
+                //   physics: const NeverScrollableScrollPhysics(),
+                //   shrinkWrap: true,
+                //   itemBuilder: (context, index) {
+                //     final booking = finished[index];
+                //     final dateField = booking["date"];
+                //     String formattedDate = "";
+
+                //     if (dateField is Timestamp) {
+                //       final dateTime = dateField.toDate();
+                //       formattedDate = DateFormat(
+                //         'MMMM d, yyyy',
+                //       ).format(dateTime);
+                //     }
+
+                //     return Card(
+                //       margin: EdgeInsets.symmetric(vertical: 6.h),
+                //       shape: RoundedRectangleBorder(
+                //         borderRadius: BorderRadius.circular(12.r),
+                //       ),
+                //       child: ListTile(
+                //         leading: const Icon(
+                //           Icons.sports_soccer,
+                //           color: Colors.green,
+                //         ),
+                //         title: Text(
+                //           booking['username'],
+                //           style: const TextStyle(fontWeight: FontWeight.bold),
+                //         ),
+                //         subtitle: Column(
+                //           crossAxisAlignment: CrossAxisAlignment.start,
+                //           children: [
+                //             Text(
+                //               formattedDate,
+                //               style: TextStyle(
+                //                 fontSize: 13.sp,
+                //                 color: Colors.grey[700],
+                //               ),
+                //             ),
+                //             SizedBox(height: 4.h),
+                //             if (booking["slots"] != null &&
+                //                 (booking["slots"] as List).isNotEmpty)
+                //               ...List.generate(
+                //                 (booking["slots"] as List).length,
+                //                 (i) {
+                //                   final slot = booking["slots"][i];
+                //                   return Row(
+                //                     children: [
+                //                       const Icon(
+                //                         Icons.access_time,
+                //                         size: 14,
+                //                         color: Colors.green,
+                //                       ),
+                //                       SizedBox(width: 5.w),
+                //                       Text(
+                //                         slot["slot"] ?? "",
+                //                         style: TextStyle(
+                //                           fontSize: 13.sp,
+                //                           color: Colors.grey[600],
+                //                         ),
+                //                       ),
+                //                     ],
+                //                   );
+                //                 },
+                //               ),
+                //           ],
+                //         ),
+                //         trailing: Text(
+                //           booking['status'],
+                //           style: TextStyle(
+                //             fontWeight: FontWeight.bold,
+                //             color:
+                //                 booking['status'] == 'booked'
+                //                     ? Colors.green
+                //                     : Colors.red,
+                //           ),
+                //         ),
+                //       ),
+                //     );
+                //   },
+                // ),
               ],
             );
           },

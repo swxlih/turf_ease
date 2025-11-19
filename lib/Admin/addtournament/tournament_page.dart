@@ -13,14 +13,12 @@ class TournamentPage extends StatefulWidget {
 class _TournamentPageState extends State<TournamentPage> {
   final _formKey = GlobalKey<FormState>();
 
-  // final TextEditingController _tournamentNameController = TextEditingController();
+  final TextEditingController _tournamentNameController = TextEditingController();
   final TextEditingController _turfNameController = TextEditingController();
   final TextEditingController _dateController = TextEditingController();
-  // final TextEditingController _descriptionController = TextEditingController();
-  // final TextEditingController _turfentryfeeController = TextEditingController();
-  // final TextEditingController _turffirstController = TextEditingController();
-  // final TextEditingController _turfsecondController = TextEditingController();
-  // final TextEditingController _turfthirdController = TextEditingController();
+  final TextEditingController _turfentryfeeController = TextEditingController();
+  final TextEditingController _turffirstController = TextEditingController();
+  final TextEditingController _turfsecondController = TextEditingController();
 
 
   bool _isLoading = false;
@@ -54,16 +52,16 @@ class _TournamentPageState extends State<TournamentPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              //  TextFormField(
-              //   controller: _tournamentNameController,
-              //   decoration: const InputDecoration(
-              //     labelText: 'Tournament Name',
-              //     border: OutlineInputBorder(),
-              //   ),
-              //   validator: (value) =>
-              //       value!.isEmpty ? 'Enter tournament name' : null,
-              // ),
-              //  SizedBox(height: 16.h),
+               TextFormField(
+                controller: _tournamentNameController,
+                decoration: const InputDecoration(
+                  labelText: 'Tournament Name',
+                  border: OutlineInputBorder(),
+                ),
+                validator: (value) =>
+                    value!.isEmpty ? 'Enter tournament name' : null,
+              ),
+               SizedBox(height: 16.h),
               TextFormField(
                 controller: _turfNameController,
                 decoration: const InputDecoration(
@@ -73,42 +71,34 @@ class _TournamentPageState extends State<TournamentPage> {
                 validator: (value) => value!.isEmpty ? 'Enter turf name' : null,
               ),
                SizedBox(height: 16.h),
-              // TextFormField(
-              //   controller: _turfentryfeeController,
-              //   decoration: const InputDecoration(
-              //     labelText: 'Entry Fee',
-              //     border: OutlineInputBorder(),
-              //   ),
-              //   validator: (value) => value!.isEmpty ? 'Enter Entry Fee' : null,
-              // ),
-              //  SizedBox(height: 16.h),
-              //  TextFormField(
-              //   controller: _turffirstController,
-              //   decoration: const InputDecoration(
-              //     labelText: 'First Prize',
-              //     border: OutlineInputBorder(),
-              //   ),
-              //   validator: (value) => value!.isEmpty ? 'Enter first prize' : null,
-              // ),
-              //  SizedBox(height: 16.h),
-              //  TextFormField(
-              //   controller: _turfsecondController,
-              //   decoration: const InputDecoration(
-              //     labelText: 'Second Prize',
-              //     border: OutlineInputBorder(),
-              //   ),
-              //   validator: (value) => value!.isEmpty ? 'Enter second prize' : null,
-              // ),
-              //  SizedBox(height: 16.h),
-              //  TextFormField(
-              //   controller: _turfthirdController,
-              //   decoration: const InputDecoration(
-              //     labelText: 'Third Prize',
-              //     border: OutlineInputBorder(),
-              //   ),
-              //   validator: (value) => value!.isEmpty ? 'Enter third prize' : null,
-              // ),
-              //  SizedBox(height: 16.h),
+              TextFormField(
+                controller: _turfentryfeeController,
+                decoration: const InputDecoration(
+                  labelText: 'Ground Fee',
+                  border: OutlineInputBorder(),
+                ),
+                validator: (value) => value!.isEmpty ? 'Enter Entry Fee' : null,
+              ),
+               SizedBox(height: 16.h),
+               TextFormField(
+                controller: _turffirstController,
+                decoration: const InputDecoration(
+                  labelText: 'First Prize',
+                  border: OutlineInputBorder(),
+                ),
+                validator: (value) => value!.isEmpty ? 'Enter first prize' : null,
+              ),
+               SizedBox(height: 16.h),
+               TextFormField(
+                controller: _turfsecondController,
+                decoration: const InputDecoration(
+                  labelText: 'Second Prize',
+                  border: OutlineInputBorder(),
+                ),
+                validator: (value) => value!.isEmpty ? 'Enter second prize' : null,
+              ),
+               SizedBox(height: 16.h),
+              
               TextFormField(
                 controller: _dateController,
                 readOnly: true,
@@ -121,23 +111,14 @@ class _TournamentPageState extends State<TournamentPage> {
                 validator: (value) => value!.isEmpty ? 'Select a date' : null,
               ),
                SizedBox(height: 16.h),
-              // TextFormField(
-              //   controller: _descriptionController,
-              //   maxLines: 4,
-              //   decoration: const InputDecoration(
-              //     labelText: 'Description',
-              //     border: OutlineInputBorder(),
-              //   ),
-              //   validator: (value) =>
-              //       value!.isEmpty ? 'Enter tournament description' : null,
-              // ),
-              //  SizedBox(height: 24.h),
+             
               SizedBox(
                 width: double.infinity,
                 height: 48.h,
                 child: ElevatedButton.icon(
-                  onPressed:() {
-                    addTournament(_turfNameController.text, _dateController.text);
+                  onPressed:() async{
+                  await  addTournament(_turfNameController.text, _dateController.text,_tournamentNameController.text,_turfentryfeeController.text,_turffirstController.text,_turfsecondController.text);
+                  Navigator.pop(context);
                   },
                   icon: _isLoading
                       ?  SizedBox(

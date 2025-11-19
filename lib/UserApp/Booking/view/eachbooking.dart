@@ -209,6 +209,9 @@ class _TurfBookingPageState extends State<TurfBookingPage> {
         "slots": slotDetails,
         "paymentId": response.paymentId ?? "N/A",
         "status": "booked",
+        "paystatus":"paid",
+        "orderid":response.orderId,
+        "signature":response.signature,
         "createdAt": FieldValue.serverTimestamp(),
       };
 

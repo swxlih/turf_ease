@@ -9,6 +9,7 @@ import 'package:medical_app/Auth/model/usermodel.dart';
 import 'package:medical_app/UserApp/Bottomnav/view/bottomnav.dart';
 import 'package:medical_app/UserApp/provider/user_provider.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthService extends ChangeNotifier {
   final _auth = FirebaseAuth.instance;
@@ -108,16 +109,22 @@ class AuthService extends ChangeNotifier {
         DocumentSnapshot userDoc =
             await _firestore.collection('Users').doc(user.uid).get();
 
+        
+
         if (userDoc.exists) {
           Map<String, dynamic> userData =
               userDoc.data() as Map<String, dynamic>;
           String role = userData['role'];
 
-          // Shared Preferences
+           SharedPreferences prefs = await SharedPreferences.getInstance();
+
+        
 
           if (role == 'user') {
             String username = userDoc['name'];
             String userphone = userDoc['number'];
+
+            await prefs.setString("uid", user.uid);
             Provider.of<UserProvider>(context, listen: false).setUser(
               userId: user.uid,
               username: username,
@@ -129,6 +136,7 @@ class AuthService extends ChangeNotifier {
               (route) => false,
             );
           } else if (role == 'turfowner') {
+            await prefs.setString("uid", user.uid);
             Navigator.pushAndRemoveUntil(
               context,
               MaterialPageRoute(builder: (context) => AdminBotomnav()),
@@ -156,8 +164,8 @@ class AuthService extends ChangeNotifier {
 
   Future<void> signout(BuildContext context) async {
     await FirebaseAuth.instance.signOut();
-    // final prefs = await SharedPreferences.getInstance();
-    // await prefs.remove('userId');
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove("uid");
     Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(builder: (context) => LoginPage()),

@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -60,6 +61,8 @@ class NotificationService {
       if (fcmToken == null) {
         debugPrint("⚠️ Failed to get FCM token");
         return;
+      }else{
+        log(fcmToken);
       }
 
       await FirebaseFirestore.instance.collection('Users').doc(user.uid).update({

@@ -1,13 +1,17 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:medical_app/Admin/addtournament/sendnotifcations.dart';
 
-Future<void> addTournament(String name, String date) async {
+Future<void> addTournament(String name, String date ,String turfname, String groundfee,String firstprize,String secondprize ) async {
   final doc = FirebaseFirestore.instance.collection("Tournaments").doc();
 
   await doc.set({
     "id": doc.id,
     "name": name,
     "date": date,
+    "turfname":turfname,
+    "firstprize":firstprize,
+    "secondprize":secondprize,
+    "groundfee":groundfee, 
     "createdAt": FieldValue.serverTimestamp(),
   });
 
