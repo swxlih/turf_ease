@@ -93,16 +93,16 @@ class _HomePageState extends State<HomePage> {
               padding: const EdgeInsets.all(16.0),
               child: Row(
                 children: [
-                   CircleAvatar(
+                  CircleAvatar(
                     radius: 25.r,
                     backgroundImage: NetworkImage(
                       "https://cdn-icons-png.flaticon.com/512/3135/3135715.png",
                     ),
                   ),
-                   SizedBox(width: 12.w),
+                  SizedBox(width: 12.w),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    children:  [
+                    children: [
                       Text(
                         "Hello!",
                         style: TextStyle(
@@ -110,7 +110,10 @@ class _HomePageState extends State<HomePage> {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      Text("Good morning 👋", style: TextStyle(fontSize: 14.sp)),
+                      Text(
+                        "Good morning 👋",
+                        style: TextStyle(fontSize: 14.sp),
+                      ),
                     ],
                   ),
                   const Spacer(),
@@ -121,7 +124,7 @@ class _HomePageState extends State<HomePage> {
 
             // 🔍 Search bar
             Padding(
-              padding:  EdgeInsets.symmetric(horizontal: 16.0.w),
+              padding: EdgeInsets.symmetric(horizontal: 16.0.w),
               child: TextField(
                 controller: _searchController,
                 decoration: InputDecoration(
@@ -137,11 +140,11 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
 
-             SizedBox(height: 16.h),
+            SizedBox(height: 16.h),
 
             // 🏏 Category filter
             Padding(
-              padding:  EdgeInsets.only(left: 16.w, top: 10.h),
+              padding: EdgeInsets.only(left: 16.w, top: 10.h),
               child: SizedBox(
                 height: 40.h,
                 child: ListView.builder(
@@ -152,13 +155,14 @@ class _HomePageState extends State<HomePage> {
                     return GestureDetector(
                       onTap: () => filterByCategory(index),
                       child: Container(
-                        margin:  EdgeInsets.only(right: 12.w),
-                        padding:  EdgeInsets.symmetric(
+                        margin: EdgeInsets.only(right: 12.w),
+                        padding: EdgeInsets.symmetric(
                           horizontal: 16.w,
                           vertical: 8.h,
                         ),
                         decoration: BoxDecoration(
-                          color:isSelected ? Colors.green : Colors.grey.shade200,
+                          color:
+                              isSelected ? Colors.green : Colors.grey.shade200,
                           borderRadius: BorderRadius.circular(20).r,
                         ),
                         child: Center(
@@ -177,7 +181,7 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
 
-             SizedBox(height: 16.h),
+            SizedBox(height: 16.h),
 
             // 🏟️ Turf Grid
             Expanded(
@@ -185,17 +189,19 @@ class _HomePageState extends State<HomePage> {
                   allTurfs.isEmpty
                       ? const Center(child: CircularProgressIndicator())
                       : Padding(
-                        padding:  EdgeInsets.symmetric(horizontal: 16.w),
+                        padding: EdgeInsets.symmetric(horizontal: 16.w),
                         child: StreamBuilder(
-                          stream: FirebaseFirestore.instance
-              .collection('Users')
-              .where('role', isEqualTo: 'turfowner').snapshots(),
+                          stream:
+                              FirebaseFirestore.instance
+                                  .collection('Users')
+                                  .where('role', isEqualTo: 'turfowner')
+                                  .snapshots(),
                           builder: (context, asyncSnapshot) {
-                            fetchTurfs();
+                            
                             return GridView.builder(
                               itemCount: filteredTurfs.length,
                               gridDelegate:
-                                   SliverGridDelegateWithFixedCrossAxisCount(
+                                  SliverGridDelegateWithFixedCrossAxisCount(
                                     crossAxisCount: 2,
                                     crossAxisSpacing: 20.w,
                                     mainAxisSpacing: 20.h,
@@ -203,9 +209,11 @@ class _HomePageState extends State<HomePage> {
                                   ),
                               itemBuilder: (context, index) {
                                 final turf = filteredTurfs[index];
-                                final moringrupees = turf['morningRate']?.toString() ?? 'N/A';
-                                final eveningrupees = turf['eveningRate']?.toString() ?? 'N/A';
-                            
+                                final moringrupees =
+                                    turf['morningRate']?.toString() ?? 'N/A';
+                                final eveningrupees =
+                                    turf['eveningRate']?.toString() ?? 'N/A';
+
                                 return InkWell(
                                   onTap: () {
                                     Navigator.push(
@@ -233,15 +241,16 @@ class _HomePageState extends State<HomePage> {
                                         BoxShadow(
                                           color: Colors.black12,
                                           blurRadius: 3.r,
-                                          offset:  Offset(3.w, 7.h),
+                                          offset: Offset(3.w, 7.h),
                                         ),
                                       ],
                                     ),
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
                                         ClipRRect(
-                                          borderRadius:  BorderRadius.vertical(
+                                          borderRadius: BorderRadius.vertical(
                                             top: Radius.circular(16).r,
                                           ),
                                           child: Image.network(
@@ -251,11 +260,13 @@ class _HomePageState extends State<HomePage> {
                                             fit: BoxFit.cover,
                                             errorBuilder:
                                                 (context, error, stackTrace) =>
-                                                    const Icon(Icons.broken_image),
+                                                    const Icon(
+                                                      Icons.broken_image,
+                                                    ),
                                           ),
                                         ),
                                         Padding(
-                                          padding:  EdgeInsets.all(8.w),
+                                          padding: EdgeInsets.all(8.w),
                                           child: Column(
                                             crossAxisAlignment:
                                                 CrossAxisAlignment.start,
@@ -265,15 +276,18 @@ class _HomePageState extends State<HomePage> {
                                                   Expanded(
                                                     child: Text(
                                                       maxLines: 1,
-                                                      overflow: TextOverflow.ellipsis,
-                                                      turf['turfname'] ?? 'Unknown',
-                                                      style:  TextStyle(
+                                                      overflow:
+                                                          TextOverflow.ellipsis,
+                                                      turf['turfname'] ??
+                                                          'Unknown',
+                                                      style: TextStyle(
                                                         fontSize: 14.sp,
-                                                        fontWeight: FontWeight.bold,
+                                                        fontWeight:
+                                                            FontWeight.bold,
                                                       ),
                                                     ),
                                                   ),
-                                                   Icon(
+                                                  Icon(
                                                     Icons.favorite_border,
                                                     size: 16.sp,
                                                   ),
@@ -284,19 +298,21 @@ class _HomePageState extends State<HomePage> {
                                                   Expanded(
                                                     child: Text(
                                                       turf['city'] ?? 'No city',
-                                                      style:  TextStyle(
+                                                      style: TextStyle(
                                                         fontSize: 12.sp,
                                                       ),
                                                     ),
                                                   ),
-                                                   Icon(
+                                                  Icon(
                                                     Icons.star,
                                                     size: 16.sp,
                                                     color: Colors.amberAccent,
                                                   ),
-                                                   Text(
+                                                  Text(
                                                     "4.1",
-                                                    style: TextStyle(fontSize: 12.sp),
+                                                    style: TextStyle(
+                                                      fontSize: 12.sp,
+                                                    ),
                                                   ),
                                                 ],
                                               ),
@@ -309,7 +325,7 @@ class _HomePageState extends State<HomePage> {
                                 );
                               },
                             );
-                          }
+                          },
                         ),
                       ),
             ),

@@ -43,10 +43,10 @@ class AuthService extends ChangeNotifier {
                   "morningRate": data.morningRate,
                   "eveningRate": data.eveningRate,
                   "citylist": generatePrefixes(data.city ?? 'N/A'),
-                  "address": data.address,                
+                  "address": data.address,
                   "turfimage": data.turfimage,
                   "createdAt": Timestamp.now(),
-                  "fcmToken":"",
+                  "fcmToken": "",
                   if (data.role == 'turfowner')
                     "features": {
                       "bathroom": false,
@@ -59,6 +59,32 @@ class AuthService extends ChangeNotifier {
                       "Football": false,
                       "Cricket": false,
                       "Badminton": false,
+                    },
+
+                  //rentals
+                  if (data.role == "turfowner")
+                    "rentals": {
+                      "football": {
+                        "boots": {
+                          "enabled": false,
+                          "price": 0,
+                          "sizes": {
+                            // size : quantity
+                            "6":0,
+                            "7": 0,
+                            "8": 0,
+                            "9": 0,
+                            "10": 0,
+                            "11": 0,
+                          },
+                        },
+                      },
+                      "cricket": {
+                        "bat": {"enabled": false, "price": 0, "quantity": 0},
+                      },
+                      "badminton": {
+                        "racket": {"enabled": false, "price": 0, "quantity": 0},
+                      },
                     },
                 })
                 .then((value) {
@@ -94,31 +120,25 @@ class AuthService extends ChangeNotifier {
         password: passwordController.trim(),
       );
 
-      
-     await NotificationService().updateFcmTokenAfterLogin();
+      await NotificationService().updateFcmTokenAfterLogin();
 
-     // Subscribe to topic (VERY IMPORTANT)
-     await FirebaseMessaging.instance.subscribeToTopic("all_users");   
-     print("📌 User subscribed to all_users topic");
-    
+      // Subscribe to topic (VERY IMPORTANT)
+      await FirebaseMessaging.instance.subscribeToTopic("all_users");
+      print("📌 User subscribed to all_users topic");
 
       User? user = userCredential.user;
 
-      if (user != null) { 
+      if (user != null) {
         // Check in "users" collection
         DocumentSnapshot userDoc =
             await _firestore.collection('Users').doc(user.uid).get();
-
-        
 
         if (userDoc.exists) {
           Map<String, dynamic> userData =
               userDoc.data() as Map<String, dynamic>;
           String role = userData['role'];
 
-           SharedPreferences prefs = await SharedPreferences.getInstance();
-
-        
+          SharedPreferences prefs = await SharedPreferences.getInstance();
 
           if (role == 'user') {
             String username = userDoc['name'];

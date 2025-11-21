@@ -17,6 +17,7 @@ class RegisterPage extends StatefulWidget {
 class _RegisterPageState extends State<RegisterPage>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  bool _isLoading = false;
 
   final _userFormKey = GlobalKey<FormState>();
   final _ownerFormKey = GlobalKey<FormState>();
@@ -39,12 +40,13 @@ class _RegisterPageState extends State<RegisterPage>
   final TextEditingController _ownerlocationController =
       TextEditingController();
   final TextEditingController _ownerAddressController = TextEditingController();
-  final TextEditingController _ownermorningrateController = TextEditingController();
-final TextEditingController _ownereveningrateController = TextEditingController();
-  
+  final TextEditingController _ownermorningrateController =
+      TextEditingController();
+  final TextEditingController _ownereveningrateController =
+      TextEditingController();
+
   File? _pickedImage;
   final ImagePicker _picker = ImagePicker();
-
 
   final _authService = AuthService();
 
@@ -109,20 +111,20 @@ final TextEditingController _ownereveningrateController = TextEditingController(
       filled: true,
       fillColor: const Color(0x40D9D9D9),
       hintText: hint,
-      hintStyle:  TextStyle(
+      hintStyle: TextStyle(
         color: Colors.grey,
         fontWeight: FontWeight.w300,
         fontSize: 14.sp,
       ),
       enabledBorder: OutlineInputBorder(
-        borderSide:  BorderSide(
+        borderSide: BorderSide(
           color: Color.fromARGB(255, 225, 225, 225),
           width: 1.w,
         ),
         borderRadius: BorderRadius.circular(10).r,
       ),
       focusedBorder: OutlineInputBorder(
-        borderSide:  BorderSide(color: Color(0xFFD4D4D4), width: 2.w),
+        borderSide: BorderSide(color: Color(0xFFD4D4D4), width: 2.w),
         borderRadius: BorderRadius.circular(10).r,
       ),
     );
@@ -149,7 +151,7 @@ final TextEditingController _ownereveningrateController = TextEditingController(
         children: [
           // -------- USER FORM ----------
           SingleChildScrollView(
-            padding:  EdgeInsets.all(16.0),
+            padding: EdgeInsets.all(16.0),
             child: Form(
               key: _userFormKey,
               child: Column(
@@ -159,20 +161,20 @@ final TextEditingController _ownereveningrateController = TextEditingController(
                     "Full Name",
                     style: TextStyle(fontWeight: FontWeight.w400),
                   ),
-                   SizedBox(height: 5.h),
+                  SizedBox(height: 5.h),
                   TextFormField(
                     controller: _userNameController,
                     decoration: _inputDecoration("Enter your full name"),
                     validator:
                         (value) => value!.isEmpty ? "Enter your name" : null,
                   ),
-                   SizedBox(height: 15.h),
+                  SizedBox(height: 15.h),
                   const Text(
                     "Phone Number",
                     style: TextStyle(fontWeight: FontWeight.w400),
                   ),
-                   SizedBox(height: 5.h),
-                  TextFormField(  
+                  SizedBox(height: 5.h),
+                  TextFormField(
                     controller: _userNumberController,
                     keyboardType: TextInputType.phone, // ✅ numeric keyboard
                     decoration: _inputDecoration("Enter your phone number"),
@@ -243,6 +245,7 @@ final TextEditingController _ownereveningrateController = TextEditingController(
                   Center(
                     child: GestureDetector(
                       onTap: () async {
+                        setState(() => _isLoading = true);
                         Usermodel body = Usermodel();
                         body.name =
                             _tabController.index == 0
@@ -272,15 +275,17 @@ final TextEditingController _ownereveningrateController = TextEditingController(
                             _tabController.index == 0
                                 ? null
                                 : _ownermorningrateController.text;
-                        body.eveningRate =  
-                             _tabController.index ==0?
-                             null : _ownereveningrateController.text;
+                        body.eveningRate =
+                            _tabController.index == 0
+                                ? null
+                                : _ownereveningrateController.text;
                         body.role =
                             _tabController.index == 0 ? "user" : "turfowner";
                         body.turfimage =
-                              (_tabController.index == 0 ? null : _pickedImage) as String?;
+                            (_tabController.index == 0 ? null : _pickedImage)
+                                as String?;
 
-                        await _authService.userregister(  
+                        await _authService.userregister(
                           data: body,
                           password: _userPasswordController.text,
                           context: context,
@@ -293,14 +298,24 @@ final TextEditingController _ownereveningrateController = TextEditingController(
                           color: const Color.fromARGB(255, 5, 90, 8),
                           borderRadius: BorderRadius.circular(15).r,
                         ),
-                        child: const Center(
-                          child: Text(
-                            "Register as User",
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
-                          ),
+                        child: Center(
+                          child:
+                              _isLoading
+                                  ? SizedBox(
+                                    height: 25.h,
+                                    width: 25.h,
+                                    child: CircularProgressIndicator(
+                                      color: Colors.white,
+                                      strokeWidth: 3.w,
+                                    ),
+                                  )
+                                  : Text(
+                                    "Register as User",
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                    ),
+                                  ),
                         ),
                       ),
                     ),
@@ -435,7 +450,6 @@ final TextEditingController _ownereveningrateController = TextEditingController(
 
                   SizedBox(height: 15.h),
 
-                  
                   SizedBox(height: 5.h),
                   TextFormField(
                     controller: _ownereveningrateController,
@@ -466,7 +480,7 @@ final TextEditingController _ownereveningrateController = TextEditingController(
                       ),
                       child:
                           _pickedImage == null
-                              ?  Center(
+                              ? Center(
                                 child: Icon(
                                   Icons.add_a_photo,
                                   size: 50.r,
@@ -485,13 +499,15 @@ final TextEditingController _ownereveningrateController = TextEditingController(
                     ),
                   ),
 
-                   SizedBox(height: 20.h),
+                  SizedBox(height: 20.h),
 
                   // Register Button
                   Center(
                     child: GestureDetector(
                       onTap: () async {
                         if (_ownerFormKey.currentState!.validate()) {
+                          setState(() => _isLoading = true);
+
                           String? imageUrl;
 
                           // 🔹 Upload image if picked
@@ -528,9 +544,10 @@ final TextEditingController _ownereveningrateController = TextEditingController(
                               _tabController.index == 0
                                   ? null
                                   : _ownermorningrateController.text;
-                           body.eveningRate = _tabController.index ==0
-                           ? null 
-                           :_ownereveningrateController.text;
+                          body.eveningRate =
+                              _tabController.index == 0
+                                  ? null
+                                  : _ownereveningrateController.text;
                           body.role =
                               _tabController.index == 0 ? "user" : "turfowner";
                           body.turfimage =
@@ -550,14 +567,24 @@ final TextEditingController _ownereveningrateController = TextEditingController(
                           color: const Color.fromARGB(255, 5, 90, 8),
                           borderRadius: BorderRadius.circular(15).r,
                         ),
-                        child: const Center(
-                          child: Text(
-                            "Register as Turf Owner",
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
-                          ),
+                        child: Center(
+                          child:
+                              _isLoading
+                                  ? SizedBox(
+                                    height: 25.h,
+                                    width: 25.w,
+                                    child: CircularProgressIndicator(
+                                      color: Colors.white,
+                                      strokeWidth: 3.w,
+                                    ),
+                                  )
+                                  : Text(
+                                    "Register as Turf Owner",
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                    ),
+                                  ),
                         ),
                       ),
                     ),

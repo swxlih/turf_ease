@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:medical_app/UserApp/provider/booking_provider.dart';
@@ -22,8 +23,8 @@ class TurfBookingPage extends StatefulWidget {
     required this.imageurl,
     required this.turfid,
     required this.turfname,
-   required this.eveningRate,
-   required this.morningRate,
+    required this.eveningRate,
+    required this.morningRate,
     this.userid,
     this.username,
     this.usernumber,
@@ -41,6 +42,62 @@ class _TurfBookingPageState extends State<TurfBookingPage> {
   int? morningRate;
   int? eveningRate;
   int totalPrice = 0;
+  Map<String, dynamic>? rentals;
+  bool loading = true;
+  String? selectedBootSize;
+  bool rentBat = false;
+  bool rentRacket = false;
+  bool loadingrentals = true;
+  int batCount = 0;
+  int racketCount = 0;
+  int bootCount = 0;
+
+  Future<void> fetchTurfRentals() async {
+    try {
+      final doc = await FirebaseFirestore.instance
+          .collection("Users")
+          .doc(widget.turfid)
+          .get();
+
+      setState(() {
+        rentals = doc.data()?["rentals"] ?? {};
+        loadingrentals = false;
+      });
+    } catch (e) {
+      print("Error fetching rentals: $e");
+      setState(() {
+        loadingrentals = false;
+      });
+    }
+  }
+
+  num calculateRentalPrice() {
+    num total = 0;
+
+    // Boots - check if rentals and nested paths exist
+    if (selectedBootSize != null &&
+        rentals != null &&
+        rentals!.containsKey("football") &&
+        rentals!["football"]["boots"] != null) {
+      total += bootCount * (rentals!["football"]["boots"]["price"] ?? 0);
+    }
+
+    // Cricket Bat - check if exists
+    if (rentals != null &&
+        rentals!.containsKey("cricket") &&
+        rentals!["cricket"]["bat"] != null) {
+      total += batCount * (rentals!["cricket"]["bat"]["price"] ?? 0);
+    }
+
+    // Racket - check if exists
+    if (rentals != null &&
+        rentals!.containsKey("badminton") &&
+        rentals!["badminton"]["racket"] != null) {
+      total += racketCount * (rentals!["badminton"]["racket"]["price"] ?? 0);
+    }
+
+    return total;
+  }
 
   final List<String> morningSlots = [
     "06:00 AM - 07:00 AM",
@@ -85,26 +142,26 @@ class _TurfBookingPageState extends State<TurfBookingPage> {
       fetchBookedSlotsByDate(widget.turfid, DateTime.now(), context);
     });
 
- morningRate = int.tryParse(widget.morningRate) ?? 0;
+    morningRate = int.tryParse(widget.morningRate) ?? 0;
     eveningRate = int.tryParse(widget.eveningRate) ?? 0;
-   }
+
+    fetchTurfRentals();
+  }
 
   @override
   void dispose() {
-    _razorpay.clear(); // very important
+    _razorpay.clear();
     super.dispose();
   }
 
   Future<void> fetchTurfRates(String turfId) async {
-    final turfDoc =
-        await FirebaseFirestore.instance
-            .collection("turfbookings")
-            .doc(turfId)
-            .get();
+    final turfDoc = await FirebaseFirestore.instance
+        .collection("turfbookings")
+        .doc(turfId)
+        .get();
 
     if (turfDoc.exists) {
       setState(() {
-        // Convert string to int using int.tryParse()
         morningRate = int.tryParse(turfDoc['morningRate'].toString()) ?? 0;
         eveningRate = int.tryParse(turfDoc['eveningRate'].toString()) ?? 0;
         isLoadingRates = false;
@@ -127,15 +184,20 @@ class _TurfBookingPageState extends State<TurfBookingPage> {
       setState(() {
         selectedDate = date;
         selectedSlots.clear();
+        // Recalculate total price when date changes
+        totalPrice = 0;
       });
       await fetchBookedSlotsByDate(widget.turfid, selectedDate!, context);
     }
   }
 
   void _openRazorpayCheckout() {
+    // Calculate final price including rentals
+    num finalPrice = totalPrice + calculateRentalPrice();
+    
     var options = {
-      'key': 'rzp_test_dxrCt5ZPpT9H0g', // ✅ Dummy Test Key (no real money)
-      'amount': totalPrice * 100, // ₹500 (in paise)
+      'key': 'rzp_test_dxrCt5ZPpT9H0g',
+      'amount': finalPrice * 100,
       'name': 'Turf Booking (Demo)',
       'description': 'College Project Dummy Payment',
       'prefill': {'contact': '9999999999', 'email': 'demo@example.com'},
@@ -151,94 +213,114 @@ class _TurfBookingPageState extends State<TurfBookingPage> {
     }
   }
 
-  // ✅ Payment Success Handler
   void _handlePaymentSuccess(PaymentSuccessResponse response) async {
     try {
+      String userId = FirebaseAuth.instance.currentUser!.uid;
+
       final userProvider = Provider.of<UserProvider>(context, listen: false);
-      // Example values — replace with actual data from your app
-      String userId =userProvider.userId; // 🔹 Replace with FirebaseAuth.instance.currentUser!.uid if using Auth
+      // String userId = userProvider.userId;
       String username = userProvider.username;
       String userphone = userProvider.phoneNumber;
 
-      String turfId =
-          widget.turfid; // 🔹 Pass this from previous page or turf details
-      String rate = "$totalPrice"; // 🔹 Pass from turf data or selected rate
+      String turfId = widget.turfid;
+      num finalPrice = totalPrice + calculateRentalPrice();
+      String rate = "$finalPrice";
 
       final dateFormat = DateFormat("hh:mm a");
 
-      // 🔹 Convert all selected slots into timestamp format
-      List<Map<String, dynamic>> slotDetails =
-          selectedSlots.map((slot) {
-            final parts = slot.split(" - ");
-            final start = dateFormat.parse(parts[0]);
-            final end = dateFormat.parse(parts[1]);
+      List<Map<String, dynamic>> slotDetails = selectedSlots.map((slot) {
+        final parts = slot.split(" - ");
+        final start = dateFormat.parse(parts[0]);
+        final end = dateFormat.parse(parts[1]);
 
-            final startDateTime = DateTime(
-              selectedDate!.year,
-              selectedDate!.month,
-              selectedDate!.day,
-              start.hour,
-              start.minute,
-            );
+        final startDateTime = DateTime(
+          selectedDate!.year,
+          selectedDate!.month,
+          selectedDate!.day,
+          start.hour,
+          start.minute,
+        );
 
-            final endDateTime = DateTime(
-              selectedDate!.year,
-              selectedDate!.month,
-              selectedDate!.day,
-              end.hour,
-              end.minute,
-            );
+        final endDateTime = DateTime(
+          selectedDate!.year,
+          selectedDate!.month,
+          selectedDate!.day,
+          end.hour,
+          end.minute,
+        );
 
-            return {
-              "slot": slot,
-              "startTime": Timestamp.fromDate(startDateTime),
-              "endTime": Timestamp.fromDate(endDateTime),
-            };
-          }).toList();
+        return {
+          "slot": slot,
+          "startTime": Timestamp.fromDate(startDateTime),
+          "endTime": Timestamp.fromDate(endDateTime),
+        };
+      }).toList();
 
-      // 🔹 Save booking details to Firestore after successful payment
+      // Prepare rental details
+      Map<String, dynamic> rentalDetails = {};
+      if (bootCount > 0 && selectedBootSize != null) {
+        rentalDetails['boots'] = {
+          'count': bootCount,
+          'size': selectedBootSize,
+          'price': rentals!["football"]["boots"]["price"] * bootCount,
+        };
+      }
+      if (batCount > 0) {
+        rentalDetails['bats'] = {
+          'count': batCount,
+          'price': rentals!["cricket"]["bat"]["price"] * batCount,
+        };
+      }
+      if (racketCount > 0) {
+        rentalDetails['rackets'] = {
+          'count': racketCount,
+          'price': rentals!["badminton"]["racket"]["price"] * racketCount,
+        };
+      }
+
       final bookingData = {
         "userId": userId,
         "usernumber": userphone,
         "username": username,
         "turfId": turfId,
-        "turfname":widget.turfname ,
+        "turfname": widget.turfname,
         "turfimage": widget.imageurl,
         "rate": rate,
+        "slotPrice": totalPrice,
+        "rentalPrice": calculateRentalPrice(),
+        "rentals": rentalDetails,
         "date": Timestamp.fromDate(selectedDate!),
         "slots": slotDetails,
         "paymentId": response.paymentId ?? "N/A",
         "status": "booked",
-        "paystatus":"paid",
-        "orderid":response.orderId,
-        "signature":response.signature,
+        "paystatus": "paid",
+        "orderid": response.orderId,
+        "signature": response.signature,
         "createdAt": FieldValue.serverTimestamp(),
       };
 
-      // Save in turf’s subcollection
       await FirebaseFirestore.instance
           .collection("turfbookings")
           .doc(turfId)
           .collection("bookings")
           .add(bookingData);
 
-      // Save in user’s subcollection
       await FirebaseFirestore.instance
           .collection("usersbookings")
           .doc(userId)
           .collection("bookings")
           .add(bookingData);
 
-      // 🔹 Navigate to booking confirmation page
+      if (!mounted) return;
+
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder:
-              (context) => BookingConfirmedPage(
-                date: selectedDate!,
-                slots: selectedSlots,
-                paymentId: response.paymentId ?? "N/A",
-              ),
+          builder: (context) => BookingConfirmedPage(
+            date: selectedDate!,
+            slots: selectedSlots,
+            paymentId: response.paymentId ?? "N/A",
+          ),
         ),
       );
 
@@ -246,16 +328,16 @@ class _TurfBookingPageState extends State<TurfBookingPage> {
         const SnackBar(content: Text("✅ Booking Confirmed & Saved!")),
       );
     } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text("Error saving booking: $e")));
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error saving booking: $e")),
+      );
     }
   }
 
-  // ❌ Payment Failure Handler
   void _handlePaymentError(PaymentFailureResponse response) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
+      const SnackBar(
         content: Text("Payment Failed! Please try again."),
         backgroundColor: Colors.red,
       ),
@@ -278,7 +360,18 @@ class _TurfBookingPageState extends State<TurfBookingPage> {
       return;
     }
 
-    _openRazorpayCheckout(); // ✅ Dummy Payment Trigger
+    _openRazorpayCheckout();
+  }
+
+  void _updateTotalPrice() {
+    totalPrice = 0;
+    for (var s in selectedSlots) {
+      if (morningSlots.contains(s)) {
+        totalPrice += morningRate ?? 0;
+      } else if (eveningSlots.contains(s)) {
+        totalPrice += eveningRate ?? 0;
+      }
+    }
   }
 
   @override
@@ -290,12 +383,12 @@ class _TurfBookingPageState extends State<TurfBookingPage> {
       ),
       body: SingleChildScrollView(
         child: Padding(
-          padding:  EdgeInsets.all(16.w),
+          padding: EdgeInsets.all(16.w),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-               Text("Select Date", style: TextStyle(fontSize: 16.sp)),
-               SizedBox(height: 8.h),
+              Text("Select Date", style: TextStyle(fontSize: 16.sp)),
+              SizedBox(height: 8.h),
               InkWell(
                 onTap: pickDate,
                 child: Container(
@@ -307,29 +400,261 @@ class _TurfBookingPageState extends State<TurfBookingPage> {
                     border: Border.all(color: Colors.grey),
                     borderRadius: BorderRadius.circular(8.r),
                   ),
-                  child: Text(
-                    selectedDate == null
-                        ? "Select Date"
-                        : "${selectedDate!.day}-${selectedDate!.month}-${selectedDate!.year}",
-                    style:  TextStyle(fontSize: 16.sp),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        selectedDate == null
+                            ? "Select Date"
+                            : "${selectedDate!.day}-${selectedDate!.month}-${selectedDate!.year}",
+                        style: TextStyle(fontSize: 16.sp),
+                      ),
+                      Icon(Icons.calendar_today, color: Colors.grey),
+                    ],
                   ),
                 ),
               ),
-               SizedBox(height: 16.h),
-               Text(
+              SizedBox(height: 24.h),
+
+              // Rentals Section
+              if (!loadingrentals && rentals != null) ...[
+                Text(
+                  "Rentals (Optional)",
+                  style: TextStyle(
+                    fontSize: 18.sp,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(height: 16.h),
+
+                // FOOTBALL – BOOTS
+                if (rentals!.containsKey("football") &&
+                    rentals!["football"]["boots"] != null &&
+                    rentals!["football"]["boots"]["enabled"] == true) ...[
+                  Card(
+                    child: Padding(
+                      padding: EdgeInsets.all(12.w),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "Football Boots",
+                            style: TextStyle(
+                              fontSize: 16.sp,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          SizedBox(height: 8.h),
+                          Text(
+                            "Price: ₹${rentals!["football"]["boots"]["price"]} per boot",
+                          ),
+                          SizedBox(height: 8.h),
+                          if (selectedBootSize == null)
+                            ElevatedButton(
+                              onPressed: () {
+                                // Show size selection dialog
+                                showDialog(
+                                  context: context,
+                                  builder: (context) {
+                                    return AlertDialog(
+                                      title: Text("Select Boot Size"),
+                                      content: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: (rentals!["football"]["boots"]
+                                                    ["sizes"] as Map)
+                                            .keys
+                                            .map<Widget>((size) {
+                                          return ListTile(
+                                            title: Text("Size $size"),
+                                            subtitle: Text(
+                                              "Available: ${rentals!["football"]["boots"]["sizes"][size]}",
+                                            ),
+                                            onTap: () {
+                                              setState(() {
+                                                selectedBootSize = size;
+                                              });
+                                              Navigator.pop(context);
+                                            },
+                                          );
+                                        }).toList(),
+                                      ),
+                                    );
+                                  },
+                                );
+                              },
+                              child: Text("Select Size"),
+                            )
+                          else ...[
+                            Text("Selected Size: $selectedBootSize"),
+                            Row(
+                              children: [
+                                Text("Quantity: "),
+                                Spacer(),
+                                IconButton(
+                                  icon: Icon(Icons.remove),
+                                  onPressed: () {
+                                    if (bootCount > 0) {
+                                      setState(() => bootCount--);
+                                    }
+                                  },
+                                ),
+                                Text("$bootCount"),
+                                IconButton(
+                                  icon: Icon(Icons.add),
+                                  onPressed: () {
+                                    int maxAvailable =
+                                        rentals!["football"]["boots"]["sizes"]
+                                            [selectedBootSize];
+                                    if (bootCount < maxAvailable) {
+                                      setState(() => bootCount++);
+                                    }
+                                  },
+                                ),
+                              ],
+                            ),
+                            TextButton(
+                              onPressed: () {
+                                setState(() {
+                                  selectedBootSize = null;
+                                  bootCount = 0;
+                                });
+                              },
+                              child: Text("Change Size"),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 12.h),
+                ],
+
+                // CRICKET – BAT
+                if (rentals!.containsKey("cricket") &&
+                    rentals!["cricket"]["bat"] != null &&
+                    rentals!["cricket"]["bat"]["enabled"] == true) ...[
+                  Card(
+                    child: Padding(
+                      padding: EdgeInsets.all(12.w),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "Cricket Bat",
+                            style: TextStyle(
+                              fontSize: 16.sp,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          SizedBox(height: 8.h),
+                          Text(
+                            "Price: ₹${rentals!["cricket"]["bat"]["price"]} per bat",
+                          ),
+                          Text(
+                            "Available: ${rentals!["cricket"]["bat"]["quantity"]}",
+                          ),
+                          Row(
+                            children: [
+                              Text("Quantity: "),
+                              Spacer(),
+                              IconButton(
+                                icon: Icon(Icons.remove),
+                                onPressed: () {
+                                  if (batCount > 0) {
+                                    setState(() => batCount--);
+                                  }
+                                },
+                              ),
+                              Text("$batCount"),
+                              IconButton(
+                                icon: Icon(Icons.add),
+                                onPressed: () {
+                                  if (batCount <
+                                      rentals!["cricket"]["bat"]["quantity"]) {
+                                    setState(() => batCount++);
+                                  }
+                                },
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 12.h),
+                ],
+
+                // BADMINTON – RACKET
+                if (rentals!.containsKey("badminton") &&
+                    rentals!["badminton"]["racket"] != null &&
+                    rentals!["badminton"]["racket"]["enabled"] == true) ...[
+                  Card(
+                    child: Padding(
+                      padding: EdgeInsets.all(12.w),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "Badminton Racket",
+                            style: TextStyle(
+                              fontSize: 16.sp,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          SizedBox(height: 8.h),
+                          Text(
+                            "Price: ₹${rentals!["badminton"]["racket"]["price"]} per racket",
+                          ),
+                          Text(
+                            "Available: ${rentals!["badminton"]["racket"]["quantity"]}",
+                          ),
+                          Row(
+                            children: [
+                              Text("Quantity: "),
+                              Spacer(),
+                              IconButton(
+                                icon: Icon(Icons.remove),
+                                onPressed: () {
+                                  if (racketCount > 0) {
+                                    setState(() => racketCount--);
+                                  }
+                                },
+                              ),
+                              Text("$racketCount"),
+                              IconButton(
+                                icon: Icon(Icons.add),
+                                onPressed: () {
+                                  if (racketCount <
+                                      rentals!["badminton"]["racket"]
+                                          ["quantity"]) {
+                                    setState(() => racketCount++);
+                                  }
+                                },
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 24.h),
+                ],
+              ],
+
+              Text(
                 "Select Time Slots",
                 style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
               ),
-               SizedBox(height: 8 .h),
+              SizedBox(height: 8.h),
 
-               Text("Morning Slots", style: TextStyle(fontSize: 16.sp)),
-               SizedBox(height: 8.h),
+              Text("Morning Slots", style: TextStyle(fontSize: 16.sp)),
+              SizedBox(height: 8.h),
 
               GridView.builder(
                 itemCount: morningSlots.length,
                 physics: NeverScrollableScrollPhysics(),
                 shrinkWrap: true,
-                gridDelegate:  SliverGridDelegateWithFixedCrossAxisCount(
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 2,
                   mainAxisSpacing: 12.h,
                   crossAxisSpacing: 12.w,
@@ -339,47 +664,35 @@ class _TurfBookingPageState extends State<TurfBookingPage> {
                   final slot = morningSlots[index];
                   final bookedSlots =
                       Provider.of<BookingProvider>(context).bookedSlots;
-                  print("📋 Booked Slots from Provider: $bookedSlots");
                   final isBooked = bookedSlots.contains(slot);
                   final isSelected = selectedSlots.contains(slot);
 
                   return GestureDetector(
-                    onTap:
-                        isBooked
-                            ? null
-                            : () {
-                              setState(() {
-                                if (isSelected) {
-                                  selectedSlots.remove(slot);
-                                } else {
-                                  selectedSlots.add(slot);
-                                }
-
-                                totalPrice = 0;
-                                for (var s in selectedSlots) {
-                                  if (morningSlots.contains(s)) {
-                                    totalPrice += morningRate ?? 0;
-                                  } else if (eveningSlots.contains(s)) {
-                                    totalPrice += eveningRate ?? 0;
-                                  }
-                                }
-                              });
-                            },
+                    onTap: isBooked
+                        ? null
+                        : () {
+                            setState(() {
+                              if (isSelected) {
+                                selectedSlots.remove(slot);
+                              } else {
+                                selectedSlots.add(slot);
+                              }
+                              _updateTotalPrice();
+                            });
+                          },
                     child: Container(
                       alignment: Alignment.center,
                       decoration: BoxDecoration(
-                        color:
-                            isBooked
-                                ? Colors.red
-                                : isSelected
+                        color: isBooked
+                            ? Colors.red
+                            : isSelected
                                 ? Colors.blue
                                 : Colors.grey[200],
                         borderRadius: BorderRadius.circular(8.r),
                         border: Border.all(
-                          color:
-                              isBooked
-                                  ? Colors.red
-                                  : isSelected
+                          color: isBooked
+                              ? Colors.red
+                              : isSelected
                                   ? Colors.blue
                                   : Colors.grey,
                         ),
@@ -390,25 +703,23 @@ class _TurfBookingPageState extends State<TurfBookingPage> {
                           fontSize: 14.sp,
                           fontWeight: FontWeight.bold,
                           color:
-                              isBooked || isSelected
-                                  ? Colors.white
-                                  : Colors.black,
+                              isBooked || isSelected ? Colors.white : Colors.black,
                         ),
                       ),
                     ),
                   );
                 },
               ),
-               SizedBox(height: 16.h),
+              SizedBox(height: 16.h),
 
-               Text("Evening Slots", style: TextStyle(fontSize: 16.sp)),
-               SizedBox(height: 8.h),
+              Text("Evening Slots", style: TextStyle(fontSize: 16.sp)),
+              SizedBox(height: 8.h),
 
               GridView.builder(
                 itemCount: eveningSlots.length,
                 physics: NeverScrollableScrollPhysics(),
                 shrinkWrap: true,
-                gridDelegate:  SliverGridDelegateWithFixedCrossAxisCount(
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 2,
                   mainAxisSpacing: 12.h,
                   crossAxisSpacing: 12.w,
@@ -422,45 +733,31 @@ class _TurfBookingPageState extends State<TurfBookingPage> {
                   final isSelected = selectedSlots.contains(slot);
 
                   return GestureDetector(
-                    onTap:
-                        isBooked
-                            ? null
-                            : () {
-                              setState(() {
-                                if (isSelected) {
-                                  selectedSlots.remove(slot);
-                                } else {
-                                  selectedSlots.add(slot);
-                                }
-
-                                 totalPrice = 0;
-                                for (var s in selectedSlots) {
-                                  if (morningSlots.contains(s)) {
-                                    totalPrice += morningRate ?? 0;
-                                  } else if (eveningSlots.contains(s)) {
-                                    totalPrice += eveningRate ?? 0;
-                                  }
-                                }
-
-
-
-                              });
-                            },
+                    onTap: isBooked
+                        ? null
+                        : () {
+                            setState(() {
+                              if (isSelected) {
+                                selectedSlots.remove(slot);
+                              } else {
+                                selectedSlots.add(slot);
+                              }
+                              _updateTotalPrice();
+                            });
+                          },
                     child: Container(
                       alignment: Alignment.center,
                       decoration: BoxDecoration(
-                        color:
-                            isBooked
-                                ? Colors.red
-                                : isSelected
+                        color: isBooked
+                            ? Colors.red
+                            : isSelected
                                 ? Colors.blue
                                 : Colors.grey[200],
                         borderRadius: BorderRadius.circular(8.r),
                         border: Border.all(
-                          color:
-                              isBooked
-                                  ? Colors.red
-                                  : isSelected
+                          color: isBooked
+                              ? Colors.red
+                              : isSelected
                                   ? Colors.blue
                                   : Colors.grey,
                         ),
@@ -471,9 +768,7 @@ class _TurfBookingPageState extends State<TurfBookingPage> {
                           fontSize: 14.sp,
                           fontWeight: FontWeight.bold,
                           color:
-                              isBooked || isSelected
-                                  ? Colors.white
-                                  : Colors.black,
+                              isBooked || isSelected ? Colors.white : Colors.black,
                         ),
                       ),
                     ),
@@ -484,7 +779,6 @@ class _TurfBookingPageState extends State<TurfBookingPage> {
           ),
         ),
       ),
-
       bottomNavigationBar: Padding(
         padding: EdgeInsets.only(left: 20.w, bottom: 20.h, right: 20.w),
         child: SizedBox(
@@ -498,9 +792,13 @@ class _TurfBookingPageState extends State<TurfBookingPage> {
                 borderRadius: BorderRadius.circular(12.r),
               ),
             ),
-            child:  Text(
-              "Book Now ₹ ${totalPrice}",
-              style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold),
+            child: Text(
+              "Book Now ₹${totalPrice + calculateRentalPrice()}",
+              style: TextStyle(
+                fontSize: 16.sp,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
             ),
           ),
         ),
@@ -509,7 +807,6 @@ class _TurfBookingPageState extends State<TurfBookingPage> {
   }
 }
 
-/// ✅ Booking Confirmation Page (Fake for College Demo)
 class BookingConfirmedPage extends StatelessWidget {
   final DateTime date;
   final List<String> slots;
@@ -532,20 +829,20 @@ class BookingConfirmedPage extends StatelessWidget {
       ),
       body: Center(
         child: Padding(
-          padding:  EdgeInsets.all(24.w),
+          padding: EdgeInsets.all(24.w),
           child: Card(
             elevation: 4.r,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16.r),
             ),
             child: Padding(
-              padding:  EdgeInsets.all(24.w),
+              padding: EdgeInsets.all(24.w),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                   Icon(Icons.check_circle, color: Colors.green, size: 80.sp),
-                   SizedBox(height: 16.h),
-                   Text(
+                  Icon(Icons.check_circle, color: Colors.green, size: 80.sp),
+                  SizedBox(height: 16.h),
+                  Text(
                     "Payment Successful!",
                     style: TextStyle(
                       fontSize: 22,
@@ -553,24 +850,24 @@ class BookingConfirmedPage extends StatelessWidget {
                       color: Colors.green,
                     ),
                   ),
-                   SizedBox(height: 12.h),
+                  SizedBox(height: 12.h),
                   Text(
                     "Date: ${date.day}-${date.month}-${date.year}",
-                    style:  TextStyle(fontSize: 16.sp),
+                    style: TextStyle(fontSize: 16.sp),
                   ),
-                   SizedBox(height: 6.h),
+                  SizedBox(height: 6.h),
                   Text(
                     "Slots: ${slots.join(', ')}",
                     textAlign: TextAlign.center,
-                    style:  TextStyle(fontSize: 16.sp),
+                    style: TextStyle(fontSize: 16.sp),
                   ),
-                   SizedBox(height: 6.h),
+                  SizedBox(height: 6.h),
                   Text(
                     "Payment ID: $paymentId",
                     textAlign: TextAlign.center,
-                    style:  TextStyle(fontSize: 14.sp, color: Colors.grey),
+                    style: TextStyle(fontSize: 14.sp, color: Colors.grey),
                   ),
-                   SizedBox(height: 20.h),
+                  SizedBox(height: 20.h),
                   ElevatedButton(
                     onPressed: () {
                       Navigator.pop(context);

@@ -86,6 +86,7 @@ class _UserBookingsPageState extends State<UserBookingsPage> {
                         date: formattedDate,
                          slot: booking["slots"][0]["slot"],
                           totalPrice: booking['rate'],
+                          turfid: booking['turfId'],
                           
                            status: "Booked"),));
                   },
@@ -117,7 +118,7 @@ class _UserBookingsPageState extends State<UserBookingsPage> {
 
                           ),
                           child:Image.network(booking['turfimage'],fit: BoxFit.cover,)
-                              
+                        
                         ),
                   
                         // ✅ Turf Info

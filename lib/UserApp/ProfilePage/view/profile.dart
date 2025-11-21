@@ -228,25 +228,12 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
                       ),
                     ),
                   ),
-
-
-                  ElevatedButton(
-                    onPressed: () {
-                      FirebaseFirestore.instance.collection("Users").doc('zhVyEyLprvfk0xVXXMay6AvDz1I2').collection("reviews").doc(userData?['uid']).set({
-                         'id':userData?['uid'],
-                         'name':userData?['name'],
-                         'rating':4.5,
-                         'status':1,
-                         'comment':"best experinence"
-                      });
-                    
-                  }, child: Text("data"))
                 ],
               ),
     );
   }
 
-  Widget _infoRow(String label, String value) {
+  Widget _infoRow(String label, String value) {   
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
