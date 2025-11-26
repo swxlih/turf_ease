@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:medical_app/Auth/authservice/auth_service.dart';
 import 'package:medical_app/Auth/model/usermodel.dart';
+import 'package:medical_app/widgets/custom_button.dart';
+import 'package:medical_app/widgets/custom_textformfield.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -106,30 +108,6 @@ class _RegisterPageState extends State<RegisterPage>
     super.dispose();
   }
 
-  InputDecoration _inputDecoration(String hint) {
-    return InputDecoration(
-      filled: true,
-      fillColor: const Color(0x40D9D9D9),
-      hintText: hint,
-      hintStyle: TextStyle(
-        color: Colors.grey,
-        fontWeight: FontWeight.w300,
-        fontSize: 14.sp,
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderSide: BorderSide(
-          color: Color.fromARGB(255, 225, 225, 225),
-          width: 1.w,
-        ),
-        borderRadius: BorderRadius.circular(10).r,
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderSide: BorderSide(color: Color(0xFFD4D4D4), width: 2.w),
-        borderRadius: BorderRadius.circular(10).r,
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -157,27 +135,19 @@ class _RegisterPageState extends State<RegisterPage>
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    "Full Name",
-                    style: TextStyle(fontWeight: FontWeight.w400),
-                  ),
-                  SizedBox(height: 5.h),
-                  TextFormField(
+                  CustomTextFormField(
+                    label: "Full Name",
+                    hint: "Enter Your full name",
                     controller: _userNameController,
-                    decoration: _inputDecoration("Enter your full name"),
                     validator:
                         (value) => value!.isEmpty ? "Enter your name" : null,
                   ),
                   SizedBox(height: 15.h),
-                  const Text(
-                    "Phone Number",
-                    style: TextStyle(fontWeight: FontWeight.w400),
-                  ),
-                  SizedBox(height: 5.h),
-                  TextFormField(
+
+                  CustomTextFormField(
+                    label: "Phone Number",
+                    hint: "Enter Your phone number",
                     controller: _userNumberController,
-                    keyboardType: TextInputType.phone, // ✅ numeric keyboard
-                    decoration: _inputDecoration("Enter your phone number"),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return "Enter your phone number";
@@ -185,50 +155,48 @@ class _RegisterPageState extends State<RegisterPage>
                       if (value.length < 10) {
                         return "Phone number must be at least 10 digits";
                       }
-                      return null; // ✅ valid
+                      return null;
                     },
                   ),
-
                   SizedBox(height: 15.h),
 
-                  const Text(
-                    "Email",
-                    style: TextStyle(fontWeight: FontWeight.w400),
-                  ),
-                  SizedBox(height: 5.h),
-                  TextFormField(
+                  CustomTextFormField(
+                    label: "Email",
+                    hint: "Enter your email",
                     controller: _userEmailController,
-                    decoration: _inputDecoration("Enter your email"),
-                    validator:
-                        (value) => value!.isEmpty ? "Enter your email" : null,
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return "Email is required";
+                      }
+
+                      // Simple email format check
+                      if (!RegExp(
+                        r'^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$',
+                      ).hasMatch(value)) {
+                        return "Enter a valid email";
+                      }
+
+                      return null;
+                    },
                   ),
                   SizedBox(height: 15.h),
 
-                  const Text(
-                    "Password",
-                    style: TextStyle(fontWeight: FontWeight.w400),
-                  ),
-                  SizedBox(height: 5.h),
-                  TextFormField(
+                  CustomTextFormField(
+                    label: "Password",
+                    hint: "Enter your password",
                     controller: _userPasswordController,
-                    obscureText: true,
-                    decoration: _inputDecoration("Enter your password"),
+                    obscure: true,
                     validator:
                         (value) =>
                             value!.length < 6 ? "Min 6 characters" : null,
                   ),
-
                   SizedBox(height: 15.h),
 
-                  const Text(
-                    "Confirm Password",
-                    style: TextStyle(fontWeight: FontWeight.w400),
-                  ),
-                  SizedBox(height: 5.h),
-                  TextFormField(
+                  CustomTextFormField(
+                    label: "Confirm Password",
+                    hint: "Confirm your password",
                     controller: _userconfirmPasswordController,
-                    obscureText: true,
-                    decoration: _inputDecoration("Confirm your password"),
+                    obscure: true,
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return "Please confirm your password";
@@ -236,89 +204,68 @@ class _RegisterPageState extends State<RegisterPage>
                       if (value != _userPasswordController.text) {
                         return "Passwords do not match";
                       }
-                      return null; // ✅ no error
+                      return null;
                     },
                   ),
-                  const SizedBox(height: 30),
+                  SizedBox(height: 30.h),
 
                   // Register Button
-                  Center(
-                    child: GestureDetector(
-                      onTap: () async {
-                        setState(() => _isLoading = true);
-                        Usermodel body = Usermodel();
-                        body.name =
-                            _tabController.index == 0
-                                ? _userNameController.text
-                                : _ownerNameController.text;
-                        body.turfname =
-                            _tabController.index == 0
-                                ? null
-                                : _turfNameController.text;
-                        body.email =
-                            _tabController.index == 0
-                                ? _userEmailController.text
-                                : _ownerEmailController.text;
-                        body.number =
-                            _tabController.index == 0
-                                ? _userNumberController.text
-                                : _ownerNumberController.text;
-                        body.city =
-                            _tabController.index == 0
-                                ? null
-                                : _ownerNumberController.text;
-                        body.address =
-                            _tabController.index == 0
-                                ? null
-                                : _ownerAddressController.text;
-                        body.morningRate =
-                            _tabController.index == 0
-                                ? null
-                                : _ownermorningrateController.text;
-                        body.eveningRate =
-                            _tabController.index == 0
-                                ? null
-                                : _ownereveningrateController.text;
-                        body.role =
-                            _tabController.index == 0 ? "user" : "turfowner";
-                        body.turfimage =
-                            (_tabController.index == 0 ? null : _pickedImage)
-                                as String?;
+                  CustomButton(
+                    title: "Register as user",
+                    isLoading: _isLoading,
+                    onTap: () async {
+                      if (!_userFormKey.currentState!.validate()) {
+                        return; // stop here, don't show loader
+                      }
 
-                        await _authService.userregister(
-                          data: body,
-                          password: _userPasswordController.text,
-                          context: context,
-                        );
-                      },
-                      child: Container(
-                        height: 50.h,
-                        width: 350.w,
-                        decoration: BoxDecoration(
-                          color: const Color.fromARGB(255, 5, 90, 8),
-                          borderRadius: BorderRadius.circular(15).r,
-                        ),
-                        child: Center(
-                          child:
-                              _isLoading
-                                  ? SizedBox(
-                                    height: 25.h,
-                                    width: 25.h,
-                                    child: CircularProgressIndicator(
-                                      color: Colors.white,
-                                      strokeWidth: 3.w,
-                                    ),
-                                  )
-                                  : Text(
-                                    "Register as User",
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                        ),
-                      ),
-                    ),
+                      setState(() => _isLoading = true);
+                      Usermodel body = Usermodel();
+                      body.name =
+                          _tabController.index == 0
+                              ? _userNameController.text
+                              : _ownerNameController.text;
+                      body.turfname =
+                          _tabController.index == 0
+                              ? null
+                              : _turfNameController.text;
+                      body.email =
+                          _tabController.index == 0
+                              ? _userEmailController.text
+                              : _ownerEmailController.text;
+                      body.number =
+                          _tabController.index == 0
+                              ? _userNumberController.text
+                              : _ownerNumberController.text;
+                      body.city =
+                          _tabController.index == 0
+                              ? null
+                              : _ownerNumberController.text;
+                      body.address =
+                          _tabController.index == 0
+                              ? null
+                              : _ownerAddressController.text;
+                      body.morningRate =
+                          _tabController.index == 0
+                              ? null
+                              : _ownermorningrateController.text;
+                      body.eveningRate =
+                          _tabController.index == 0
+                              ? null
+                              : _ownereveningrateController.text;
+                      body.role =
+                          _tabController.index == 0 ? "user" : "turfowner";
+                      body.turfimage =
+                          (_tabController.index == 0 ? null : _pickedImage)
+                              as String?;
+
+                      await _authService.userregister(
+                        data: body,
+                        password: _userPasswordController.text,
+                        context: context,
+                      );
+
+                      setState(() => _isLoading = false);
+                    },
                   ),
                 ],
               ),
@@ -333,27 +280,19 @@ class _RegisterPageState extends State<RegisterPage>
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    "Owner Name",
-                    style: TextStyle(fontWeight: FontWeight.w400),
-                  ),
-                  SizedBox(height: 5.h),
-                  TextFormField(
+                  CustomTextFormField(
+                    label: "Owner Name",
+                    hint: "Enter owner name",
                     controller: _ownerNameController,
-                    decoration: _inputDecoration("Enter owner name"),
                     validator:
                         (value) => value!.isEmpty ? "Enter your name" : null,
                   ),
                   SizedBox(height: 15.h),
 
-                  const Text(
-                    "Phone Number",
-                    style: TextStyle(fontWeight: FontWeight.w400),
-                  ),
-                  SizedBox(height: 5.h),
-                  TextFormField(
+                  CustomTextFormField(
+                    label: "Phone Number",
+                    hint: "Enter your number",
                     controller: _ownerNumberController,
-                    decoration: _inputDecoration("Enter your number"),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return "Enter your phone number";
@@ -361,104 +300,87 @@ class _RegisterPageState extends State<RegisterPage>
                       if (value.length < 10) {
                         return "Phone number must be at least 10 digits";
                       }
-                      return null; // ✅ valid
+                      return null;
                     },
                   ),
                   SizedBox(height: 15.h),
 
-                  const Text(
-                    "Turf Name",
-                    style: TextStyle(fontWeight: FontWeight.w400),
-                  ),
-                  SizedBox(height: 5.h),
-                  TextFormField(
+                  CustomTextFormField(
+                    label: "Turf Name",
+                    hint: "Enter turf name",
                     controller: _turfNameController,
-                    decoration: _inputDecoration("Enter turf name"),
                     validator:
                         (value) => value!.isEmpty ? "Enter turf name" : null,
                   ),
                   SizedBox(height: 15.h),
 
-                  const Text(
-                    "Email",
-                    style: TextStyle(fontWeight: FontWeight.w400),
-                  ),
-                  SizedBox(height: 5.h),
-                  TextFormField(
+                  CustomTextFormField(
+                    label: "Email",
+                    hint: "Enter your email",
                     controller: _ownerEmailController,
-                    decoration: _inputDecoration("Enter your email"),
-                    validator:
-                        (value) => value!.isEmpty ? "Enter your email" : null,
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return "Email is required";
+                      }
+
+                      // Simple email format check
+                      if (!RegExp(
+                        r'^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$',
+                      ).hasMatch(value)) {
+                        return "Enter a valid email";
+                      }
+
+                      return null;
+                    },
                   ),
                   SizedBox(height: 15.h),
 
-                  const Text(
-                    "Password",
-                    style: TextStyle(fontWeight: FontWeight.w400),
-                  ),
-                  SizedBox(height: 5.h),
-                  TextFormField(
+                  CustomTextFormField(
+                    label: "Password",
+                    hint: "Enter your password",
                     controller: _ownerPasswordController,
-                    obscureText: true,
-                    decoration: _inputDecoration("Enter your password"),
+                    obscure: true,
                     validator:
                         (value) =>
                             value!.length < 6 ? "Min 6 characters" : null,
                   ),
                   SizedBox(height: 15.h),
-                  const Text(
-                    "City",
-                    style: TextStyle(fontWeight: FontWeight.w400),
-                  ),
-                  SizedBox(height: 5.h),
-                  TextFormField(
-                    controller: _ownerlocationController,
 
-                    decoration: _inputDecoration("Enter your city"),
+                  CustomTextFormField(
+                    label: "City",
+                    hint: "Enter your city",
+                    controller: _ownerlocationController,
                     validator:
                         (value) =>
                             value!.isEmpty ? "Enter your location" : null,
                   ),
                   SizedBox(height: 15.h),
 
-                  const Text(
-                    "Address",
-                    style: TextStyle(fontWeight: FontWeight.w400),
-                  ),
-                  SizedBox(height: 5.h),
-                  TextFormField(
+                  CustomTextFormField(
+                    label: "Address",
+                    hint: "Enter your address",
                     controller: _ownerAddressController,
-
-                    decoration: _inputDecoration("Enter your address"),
                     validator:
                         (value) => value!.isEmpty ? "Enter your address" : null,
                   ),
-
                   SizedBox(height: 15.h),
-                  const Text(
-                    "Rate Per Hour",
-                    style: TextStyle(fontWeight: FontWeight.w400),
-                  ),
-                  SizedBox(height: 5.h),
-                  TextFormField(
+
+                  CustomTextFormField(
+                    label: "Rate Per Hour (Morning)",
+                    hint: "Enter your Morning rate",
                     controller: _ownermorningrateController,
-
-                    decoration: _inputDecoration("Enter your Morning rate"),
                     validator:
                         (value) => value!.isEmpty ? "Enter your rate" : null,
                   ),
-
                   SizedBox(height: 15.h),
 
-                  SizedBox(height: 5.h),
-                  TextFormField(
+                  CustomTextFormField(
+                    label: "Rate Per Hour (Evening)",
+                    hint: "Enter your Fedlight rate",
                     controller: _ownereveningrateController,
-
-                    decoration: _inputDecoration("Enter your Fedlight rate"),
                     validator:
                         (value) => value!.isEmpty ? "Enter your rate" : null,
                   ),
-
                   SizedBox(height: 15.h),
 
                   // image pick from gallery i want it in a container like
@@ -502,92 +424,65 @@ class _RegisterPageState extends State<RegisterPage>
                   SizedBox(height: 20.h),
 
                   // Register Button
-                  Center(
-                    child: GestureDetector(
-                      onTap: () async {
-                        if (_ownerFormKey.currentState!.validate()) {
-                          setState(() => _isLoading = true);
+                  CustomButton(
+                    title: "Register as Owner",
+                    isLoading: _isLoading,
+                    onTap: () async {
+                      if (_ownerFormKey.currentState!.validate()) {
+                        setState(() => _isLoading = true);
 
-                          String? imageUrl;
+                        String? imageUrl;
 
-                          // 🔹 Upload image if picked
-                          if (_pickedImage != null) {
-                            imageUrl = await _uploadToCloudinary(_pickedImage!);
-                          }
-
-                          Usermodel body = Usermodel();
-                          body.name =
-                              _tabController.index == 0
-                                  ? _userNameController.text
-                                  : _ownerNameController.text;
-                          body.turfname =
-                              _tabController.index == 0
-                                  ? null
-                                  : _turfNameController.text;
-                          body.email =
-                              _tabController.index == 0
-                                  ? _userEmailController.text
-                                  : _ownerEmailController.text;
-                          body.number =
-                              _tabController.index == 0
-                                  ? _userNumberController.text
-                                  : _ownerNumberController.text;
-                          body.city =
-                              _tabController.index == 0
-                                  ? null
-                                  : _ownerlocationController.text;
-                          body.address =
-                              _tabController.index == 0
-                                  ? null
-                                  : _ownerAddressController.text;
-                          body.morningRate =
-                              _tabController.index == 0
-                                  ? null
-                                  : _ownermorningrateController.text;
-                          body.eveningRate =
-                              _tabController.index == 0
-                                  ? null
-                                  : _ownereveningrateController.text;
-                          body.role =
-                              _tabController.index == 0 ? "user" : "turfowner";
-                          body.turfimage =
-                              _tabController.index == 0 ? null : imageUrl;
-
-                          await _authService.userregister(
-                            data: body,
-                            password: _ownerPasswordController.text,
-                            context: context,
-                          );
+                        // 🔹 Upload image if picked
+                        if (_pickedImage != null) {
+                          imageUrl = await _uploadToCloudinary(_pickedImage!);
                         }
-                      },
-                      child: Container(
-                        height: 50.h,
-                        width: 350.w,
-                        decoration: BoxDecoration(
-                          color: const Color.fromARGB(255, 5, 90, 8),
-                          borderRadius: BorderRadius.circular(15).r,
-                        ),
-                        child: Center(
-                          child:
-                              _isLoading
-                                  ? SizedBox(
-                                    height: 25.h,
-                                    width: 25.w,
-                                    child: CircularProgressIndicator(
-                                      color: Colors.white,
-                                      strokeWidth: 3.w,
-                                    ),
-                                  )
-                                  : Text(
-                                    "Register as Turf Owner",
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                        ),
-                      ),
-                    ),
+
+                        Usermodel body = Usermodel();
+                        body.name =
+                            _tabController.index == 0
+                                ? _userNameController.text
+                                : _ownerNameController.text;
+                        body.turfname =
+                            _tabController.index == 0
+                                ? null
+                                : _turfNameController.text;
+                        body.email =
+                            _tabController.index == 0
+                                ? _userEmailController.text
+                                : _ownerEmailController.text;
+                        body.number =
+                            _tabController.index == 0
+                                ? _userNumberController.text
+                                : _ownerNumberController.text;
+                        body.city =
+                            _tabController.index == 0
+                                ? null
+                                : _ownerlocationController.text;
+                        body.address =
+                            _tabController.index == 0
+                                ? null
+                                : _ownerAddressController.text;
+                        body.morningRate =
+                            _tabController.index == 0
+                                ? null
+                                : _ownermorningrateController.text;
+                        body.eveningRate =
+                            _tabController.index == 0
+                                ? null
+                                : _ownereveningrateController.text;
+                        body.role =
+                            _tabController.index == 0 ? "user" : "turfowner";
+                        body.turfimage =
+                            _tabController.index == 0 ? null : imageUrl;
+
+                        await _authService.userregister(
+                          data: body,
+                          password: _ownerPasswordController.text,
+                          context: context,
+                        );
+                      }
+                    },
                   ),
                 ],
               ),

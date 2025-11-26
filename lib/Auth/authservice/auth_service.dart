@@ -71,7 +71,7 @@ class AuthService extends ChangeNotifier {
                           "price": 0,
                           "sizes": {
                             // size : quantity
-                            "6":0,
+                            "6": 0,
                             "7": 0,
                             "8": 0,
                             "9": 0,
@@ -109,96 +109,99 @@ class AuthService extends ChangeNotifier {
 
   // common login
 
- Future<void> loginUser({
-  required String emailController,
-  required String passwordController,
-  required BuildContext context,
-}) async {
-  try {
-
-    // 🔥 STEP 1: Custom Admin Login BEFORE Firebase
-    if (emailController.trim() == "admin@gmail.com" &&
-        passwordController.trim() == "Admin@123") {
-      
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      await prefs.setString("uid", "custom_admin");
-      await prefs.setString("role", "admin");
-
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(builder: (context) => Adminhomepage()),
-        (route) => false,
-      );
-      print("✔ Custom admin logged in");
-      return;
-    }
-
-    // 🔥 STEP 2: Firebase User Login
-    UserCredential userCredential = await _auth.signInWithEmailAndPassword(
-      email: emailController.trim(),
-      password: passwordController.trim(),
-    );
-
-    await NotificationService().updateFcmTokenAfterLogin();
-    await FirebaseMessaging.instance.subscribeToTopic("all_users");
-
-    User? user = userCredential.user;
-
-    if (user != null) {
-      DocumentSnapshot userDoc =
-          await _firestore.collection('Users').doc(user.uid).get();
-
-      if (userDoc.exists) {
-        Map<String, dynamic> userData =
-            userDoc.data() as Map<String, dynamic>;
-        String role = userData['role'];
-
+  Future<void> loginUser({
+    required String emailController,
+    required String passwordController,
+    required BuildContext context,
+  }) async {
+    try {
+      // 🔥 STEP 1: Custom Admin Login BEFORE Firebase
+      if (emailController.trim() == "admin@gmail.com" &&
+          passwordController.trim() == "Admin@123") {
         SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.setString("uid", "custom_admin");
+        await prefs.setString("role", "admin");
 
-        if (role == 'user') {
-          await prefs.setString("uid", user.uid);
-          await prefs.setString("role", "user");
-
-          Provider.of<UserProvider>(context, listen: false).setUser(
-            userId: user.uid,
-            username: userDoc['name'],
-            phoneNumber: userDoc['number'],
-          );
-
-          Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(builder: (context) => BottomNav()),
-            (route) => false,
-          );
-
-        } else if (role == 'turfowner') {
-          await prefs.setString("uid", user.uid);
-          await prefs.setString("role", "turfowner");
-
-          Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(builder: (context) => VendorBotomnav()),
-            (route) => false,
-          );
-
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("Invalid role assigned.")),
-          );
-        }
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => Adminhomepage()),
+          (route) => false,
+        );
+        print("✔ Custom admin logged in");
         return;
       }
 
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text("No account data found.")));
+      // 🔥 STEP 2: Firebase User Login
+      UserCredential userCredential = await _auth
+          .signInWithEmailAndPassword(
+            email: emailController.trim(),
+            password: passwordController.trim(),
+          )
+          .onError((error, stackTrace) {
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text("Wrong Password")));
+            return Future.error(error!);
+          });
+
+      await NotificationService().updateFcmTokenAfterLogin();
+      await FirebaseMessaging.instance.subscribeToTopic("all_users");
+
+      User? user = userCredential.user;
+
+      if (user != null) {
+        DocumentSnapshot userDoc =
+            await _firestore.collection('Users').doc(user.uid).get();
+
+        if (userDoc.exists) {
+          Map<String, dynamic> userData =
+              userDoc.data() as Map<String, dynamic>;
+          String role = userData['role'];
+
+          SharedPreferences prefs = await SharedPreferences.getInstance();
+
+          if (role == 'user') {
+            await prefs.setString("uid", user.uid);
+            await prefs.setString("role", "user");
+
+            Provider.of<UserProvider>(context, listen: false).setUser(
+              userId: user.uid,
+              username: userDoc['name'],
+              phoneNumber: userDoc['number'],
+            );
+
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(builder: (context) => BottomNav()),
+              (route) => false,
+            );
+          } else if (role == 'turfowner') {
+            await prefs.setString("uid", user.uid);
+            await prefs.setString("role", "turfowner");
+
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(builder: (context) => VendorBotomnav()),
+              (route) => false,
+            );
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text("Invalid role assigned.")),
+            );
+          }
+          return;
+        }
+
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text("No account data found.")));
+      }
+    } on FirebaseAuthException catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Login failed: ${e.message}")));
     }
-
-  } on FirebaseAuthException catch (e) {
-    ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(content: Text("Login failed: ${e.message}")));
   }
-}
-
 
   // logout
 

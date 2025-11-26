@@ -39,7 +39,7 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> fetchTurfs() async {
     try {
-      // final snapshot = 
+      final snapshot = 
           await FirebaseFirestore.instance
               .collection('Users')
               .where('role', isEqualTo: 'turfowner')
