@@ -2,9 +2,9 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:medical_app/Auth/authservice/fsm.dart';
-import 'package:medical_app/UserApp/Splashpage/view/splash_page.dart';
-import 'package:medical_app/UserApp/provider/booking_provider.dart';
-import 'package:medical_app/UserApp/provider/user_provider.dart';
+import 'package:medical_app/Features/UserApp/Splashpage/view/splash_page.dart';
+import 'package:medical_app/Features/UserApp/provider/booking_provider.dart';
+import 'package:medical_app/Features/UserApp/provider/user_provider.dart';
 import 'package:provider/provider.dart';
 
 void main() async {
