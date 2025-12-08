@@ -9,33 +9,29 @@ import 'package:provider/provider.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
 import 'package:intl/intl.dart';
 
-class TurfBookingPage extends StatefulWidget {
+class VendorBookadd extends StatefulWidget {
  final String imageurl;
- final String turfid;
+ final  String turfid;
  final String turfname;
- final String? userid;
- final String? username;
- final String? usernumber;
  final String morningRate;
  final String eveningRate;
+ final bool isOwner;
 
- const TurfBookingPage({
+ const VendorBookadd({
     super.key,
     required this.imageurl,
     required this.turfid,
     required this.turfname,
     required this.eveningRate,
     required this.morningRate,
-    this.userid,
-    this.username,
-    this.usernumber,
+    required this.isOwner
   });
 
   @override
-  State<TurfBookingPage> createState() => _TurfBookingPageState();
+  State<VendorBookadd> createState() => _VendorBookaddState();
 }
 
-class _TurfBookingPageState extends State<TurfBookingPage> {
+class _VendorBookaddState extends State<VendorBookadd> {
   DateTime? selectedDate;
   List<String> selectedSlots = [];
   late Razorpay _razorpay;
@@ -216,7 +212,7 @@ class _TurfBookingPageState extends State<TurfBookingPage> {
   }
 
   void _handlePaymentSuccess(PaymentSuccessResponse response) async {
-    try {                
+    try {
       String userId = FirebaseAuth.instance.currentUser!.uid;
 
       final userProvider = Provider.of<UserProvider>(context, listen: false);
@@ -227,7 +223,8 @@ class _TurfBookingPageState extends State<TurfBookingPage> {
       String turfId = widget.turfid;
       num finalPrice = totalPrice + calculateRentalPrice();
       String rate = "$finalPrice";
-
+      
+      
       final dateFormat = DateFormat("hh:mm a");
 
       List<Map<String, dynamic>> slotDetails = selectedSlots.map((slot) {
@@ -356,18 +353,107 @@ class _TurfBookingPageState extends State<TurfBookingPage> {
     );
   }
 
-  void bookTurf() {
-    if (selectedDate == null || selectedSlots.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Please select date and at least one time slot"),
-        ),
-      );
-      return;
-    }
+  void bookTurf() async {
+  if (selectedDate == null || selectedSlots.isEmpty) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text("Please select date and at least one slot")),
+    );
+    return;
+  }
 
+  if (widget.isOwner) {
+    await _saveOwnerManualBooking();
+  } else {
     _openRazorpayCheckout();
   }
+}
+
+
+Future<void> _saveOwnerManualBooking() async {
+  try {
+    List<Map<String, dynamic>> slotDetails = selectedSlots.map((slot) {
+      final parts = slot.split(" - ");
+      final start = DateFormat("hh:mm a").parse(parts[0]);
+      final end = DateFormat("hh:mm a").parse(parts[1]);
+      
+
+      final startDateTime = DateTime(
+        selectedDate!.year,
+        selectedDate!.month,
+        selectedDate!.day,
+        start.hour,
+        start.minute,
+      );
+
+      final endDateTime = DateTime(
+        selectedDate!.year,
+        selectedDate!.month,
+        selectedDate!.day,
+        end.hour,
+        end.minute,
+      );
+
+      return {
+        "slot": slot,
+        "startTime": Timestamp.fromDate(startDateTime),
+        "endTime": Timestamp.fromDate(endDateTime),
+      };
+    }).toList();
+
+    String rate1 = "0";
+
+    final bookingData = {
+      "userId": "owner",
+      "username": "Turf Owner",
+      "usernumber": "N/A",
+      "turfId": widget.turfid,
+      "turfname": widget.turfname,
+      "turfimage": widget.imageurl,
+
+      "rate": rate1,
+      "slotPrice": 0,
+      "rentalPrice": 0,
+      "rentals": {},
+
+      "date": Timestamp.fromDate(selectedDate!),
+      "slots": slotDetails,
+      "paymentId": "manual",
+      "orderid": "manual",
+      "signature": "manual",
+      "status": "booked",
+      "paystatus": "not_applicable",
+
+      "createdAt": FieldValue.serverTimestamp(),
+    };
+
+    await FirebaseFirestore.instance
+        .collection("turfbookings")
+        .doc(widget.turfid)
+        .collection("bookings")
+        .add(bookingData);
+
+    await FirebaseFirestore.instance
+        .collection("bookings")
+        .doc(widget.turfid)
+        .collection("bookings")
+        .add(bookingData);
+
+    if (!mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text("Slot blocked successfully!")),
+    );
+
+    Navigator.pop(context);
+
+  } catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text("Error: $e")),
+    );
+  }
+}
+
+
 
   void _updateTotalPrice() {
     totalPrice = 0;
@@ -785,6 +871,7 @@ class _TurfBookingPageState extends State<TurfBookingPage> {
           ),
         ),
       ),
+      
       bottomNavigationBar: Padding(
         padding: EdgeInsets.only(left: 20.w, bottom: 20.h, right: 20.w),
         child: SizedBox(
@@ -799,6 +886,7 @@ class _TurfBookingPageState extends State<TurfBookingPage> {
               ),
             ),
             child: Text(
+              widget.isOwner?"Block Slot":
               "Book Now ₹${totalPrice + calculateRentalPrice()}",
               style: TextStyle(
                 fontSize: 16.sp,

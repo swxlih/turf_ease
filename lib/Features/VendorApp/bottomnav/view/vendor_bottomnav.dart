@@ -1,4 +1,8 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:medical_app/Features/VendorApp/addbooking/view/vendor_bookadd.dart';
 import 'package:medical_app/Features/VendorApp/profilepage/view/vendor_profile.dart';
 import 'package:medical_app/Features/VendorApp/vendorhomepage/view/vendor_homepage.dart';
 
@@ -13,7 +17,10 @@ class VendorBotomnav extends StatefulWidget {
 class _VendorBotomnavState extends State<VendorBotomnav> {
 
   int _selectedIndex=0;
+
   
+
+ 
 
   ontap(index){
     setState(() {
@@ -22,7 +29,7 @@ class _VendorBotomnavState extends State<VendorBotomnav> {
   }
  List<Widget> get screens => [
         VendorHomepage(),
-        
+       
         VendorProfile()   
       ];  
 
@@ -43,6 +50,7 @@ class _VendorBotomnavState extends State<VendorBotomnav> {
             icon: Icon(Icons.home),
             label: 'Home',
           ),
+         
           BottomNavigationBarItem(
             icon: Icon(Icons.person_outline_outlined),
             label: 'Profile',

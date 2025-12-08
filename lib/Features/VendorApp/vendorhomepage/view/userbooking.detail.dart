@@ -2,17 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class UserbookingDetail extends StatelessWidget {
-  final String turfName;
-  final String turfImage;
-  final String date;
-  final String rate;
-  final String paymentId;
-  final String status;
-  final String userName;
-  final String userNumber;
-  final List<Map<String, dynamic>> slots;
+   String? turfName;
+   String? turfImage;
+   String? date;
+   String? rate;
+   String? paymentId;
+   String? status;
+   String? userName;
+   String? userNumber;
+   List<Map<String, dynamic>>? slots;
 
-  const UserbookingDetail({
+   UserbookingDetail({
     super.key,
     required this.turfName,
     required this.turfImage,
@@ -49,7 +49,7 @@ class UserbookingDetail extends StatelessWidget {
             ClipRRect(
               borderRadius: BorderRadius.circular(16.r),
               child: Image.network(
-                turfImage,
+                turfImage!,
                 height: 200.h,
                 width: double.infinity,
                 fit: BoxFit.cover,
@@ -63,7 +63,7 @@ class UserbookingDetail extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  turfName,
+                  turfName!,
                   style: TextStyle(
                     fontSize: 24.sp,
                     fontWeight: FontWeight.bold,
@@ -77,7 +77,7 @@ class UserbookingDetail extends StatelessWidget {
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
-                    status.toUpperCase(),
+                    status!.toUpperCase(),
                     style: TextStyle(
                       color: statusColor,
                       fontWeight: FontWeight.bold,
@@ -90,7 +90,7 @@ class UserbookingDetail extends StatelessWidget {
             SizedBox(height: 10),
 
             Text(
-              date,
+              date!,
               style: TextStyle(fontSize: 16),
             ),
 
@@ -99,8 +99,8 @@ class UserbookingDetail extends StatelessWidget {
             _sectionCard(
               title: "User Details",
               children: [
-                _tile("Name", userName),
-                _tile("Phone", userNumber),
+                _tile("Name", userName!),
+                _tile("Phone", userNumber!),
               ],
             ),
 
@@ -110,7 +110,7 @@ class UserbookingDetail extends StatelessWidget {
               title: "Payment Details",
               children: [
                 _tile("Rate", "₹$rate"),
-                _tile("Payment ID", paymentId),
+                _tile("Payment ID", paymentId!),
               ],
             ),
 
@@ -118,7 +118,7 @@ class UserbookingDetail extends StatelessWidget {
 
             _sectionCard(
               title: "Booked Slots",
-              children: slots
+              children: slots!
                   .map((slot) => Container(
                         margin: EdgeInsets.only(bottom: 10),
                         padding: EdgeInsets.all(14),

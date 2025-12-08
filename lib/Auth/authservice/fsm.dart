@@ -52,7 +52,7 @@ class NotificationService {
   }
 
   /// Get and update token in Firestore after login
-  Future<void> updateFcmTokenAfterLogin() async {
+  Future<void> updateFcmTokenAfterLogin() async {                                                                                                          
     try {
       final user = FirebaseAuth.instance.currentUser;
       if (user == null) return;

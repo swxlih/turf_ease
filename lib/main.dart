@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:medical_app/Auth/authservice/fsm.dart';
 import 'package:medical_app/Features/UserApp/Splashpage/view/splash_page.dart';
+import 'package:medical_app/Features/UserApp/homepage/controller/home_controller.dart';
 import 'package:medical_app/Features/UserApp/provider/booking_provider.dart';
 import 'package:medical_app/Features/UserApp/provider/user_provider.dart';
 import 'package:provider/provider.dart';
@@ -23,6 +24,7 @@ class MyApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (context) => UserProvider()),
         ChangeNotifierProvider(create: (context) => BookingProvider()),
+        ChangeNotifierProvider(create: (context) => HomeController()),
       ],
       child: ScreenUtilInit(
         designSize:  Size(360, 804),

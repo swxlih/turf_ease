@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:medical_app/Auth/authservice/auth_service.dart';
 import 'package:medical_app/Auth/view/login_page.dart';
+import 'package:medical_app/Features/VendorApp/addbooking/view/vendor_bookadd.dart';
 import 'package:medical_app/Features/VendorApp/addtournament/view/tournament_page.dart';
 
 class VendorProfile extends StatefulWidget {
@@ -399,7 +400,24 @@ class _VendorProfileState extends State<VendorProfile> {
                     ),
                   ],
                 ),
+                floatingActionButton: SizedBox(
+                  width: 100.w,
+
+
+                  child: FloatingActionButton(onPressed: (){
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => VendorBookadd(
+                      imageurl: userData!['turfimage'],
+                       turfid: userData!['uid'],
+                        turfname: userData!['turfname'],
+                         eveningRate: userData!['eveningRate'],
+                          morningRate: userData!['morningRate'],
+                           isOwner: true),));
+                  },
+                  child: Text("Add Match"),
+                  ),
+                ),
     );
+    
   }
 
   Widget _buildSectionTitle(String title, IconData icon) {

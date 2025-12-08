@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:medical_app/Auth/authservice/auth_service.dart';
+import 'package:medical_app/Features/UserApp/Profile/view/change_password.dart';
 
 class ProfileSettingsPage extends StatefulWidget {
   const ProfileSettingsPage({super.key});
@@ -12,7 +13,8 @@ class ProfileSettingsPage extends StatefulWidget {
 }
 
 class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
+  
+    final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   Map<String, dynamic>? userData;
@@ -47,8 +49,6 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
       });
     }
   }
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -144,33 +144,6 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
                     ),
                   ),
 
-                  SizedBox(height: 30.h),
-
-                  // 🟩 EDIT PROFILE BUTTON
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 20.w),
-                    child: SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: () {},
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF0F9D58),
-                          padding: EdgeInsets.symmetric(vertical: 15.h),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12.r),
-                          ),
-                        ),
-                        child: Text(
-                          "Edit Profile",
-                          style: TextStyle(
-                            fontSize: 16.sp,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-
                   SizedBox(height: 15.h),
 
                   // 🟦 RESET PASSWORD BUTTON
@@ -179,7 +152,15 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
                     child: SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(
-                        onPressed: () {},
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => ChangePasswordScreen(),
+                            ),
+                          );
+                        },
+
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.green[300],
                           padding: EdgeInsets.symmetric(vertical: 15.h),
@@ -226,7 +207,7 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
     );
   }
 
-  Widget _infoRow(String label, String value) {   
+  Widget _infoRow(String label, String value) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
