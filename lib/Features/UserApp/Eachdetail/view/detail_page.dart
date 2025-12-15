@@ -127,22 +127,6 @@ class _TurfDetailPageState extends State<TurfDetailPage> {
             ),
           ),
 
-          // Bookmark icon
-          Positioned(
-            top: 40.h,
-            right: 16.w,
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12.r),
-              ),
-              child: IconButton(
-                icon: const Icon(Icons.bookmark_border),
-                onPressed: () {},
-              ),
-            ),
-          ),
-
           // Bottom sheet
           DraggableScrollableSheet(
             initialChildSize: 0.65,
@@ -270,10 +254,7 @@ class _TurfDetailPageState extends State<TurfDetailPage> {
                             icon: const Icon(Icons.call),
                             onPressed: () {},
                           ),
-                        IconButton(
-                          icon: const Icon(Icons.message),
-                          onPressed: () {},
-                        ),
+                      
                       ],
                     ),
                     SizedBox(height: 16.h),
