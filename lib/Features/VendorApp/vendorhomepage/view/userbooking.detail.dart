@@ -2,17 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class UserbookingDetail extends StatelessWidget {
-   String? turfName;
-   String? turfImage;
-   String? date;
-   String? rate;
-   String? paymentId;
-   String? status;
-   String? userName;
-   String? userNumber;
-   List<Map<String, dynamic>>? slots;
+  final String? turfName;
+  final String? turfImage;
+  final String? date;
+  final String? rate;
+  final String? paymentId;
+  final String? status;
+  final String? userName;
+  final String? userNumber;
+  final List<Map<String, dynamic>>? slots;
 
-   UserbookingDetail({
+  const UserbookingDetail({
     super.key,
     required this.turfName,
     required this.turfImage,
