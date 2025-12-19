@@ -64,6 +64,8 @@ class _NotificationsState extends State<Notifications> {
                 firstPrize: item['firstprize'],
                 secondPrize:item['secondprize'] ,
                 createdAt: formatted,
+                member: item['commitee'],
+                number: item['number'],
               ) ,));
             },
             child: Container(
@@ -86,7 +88,7 @@ class _NotificationsState extends State<Notifications> {
                 leading: CircleAvatar(
                   radius: 24,
                   backgroundColor: Colors.grey.shade200,
-                  child: Icon(Icons.notifications, color: Colors.black87),
+                  child: Text("${index+1}")
                 ),
                 title: Text(
                   item["turfname"],

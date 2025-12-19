@@ -15,13 +15,15 @@ class _TournamentPageState extends State<TournamentPage> {
 
   final TextEditingController _tournamentNameController = TextEditingController();
   final TextEditingController _turfNameController = TextEditingController();
+  final TextEditingController _committeenameController = TextEditingController();
   final TextEditingController _dateController = TextEditingController();
   final TextEditingController _turfentryfeeController = TextEditingController();
   final TextEditingController _turffirstController = TextEditingController();
   final TextEditingController _turfsecondController = TextEditingController();
+  final TextEditingController _commiteenumberController = TextEditingController();
 
 
-  bool _isLoading = false;
+ final bool _isLoading = false;
 
   
 
@@ -50,9 +52,9 @@ class _TournamentPageState extends State<TournamentPage> {
         child: Form(
           key: _formKey,
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-               TextFormField(
+           crossAxisAlignment: CrossAxisAlignment.start,
+           children: [
+               TextFormField(    
                 controller: _tournamentNameController,
                 decoration: const InputDecoration(
                   labelText: 'Tournament Name',
@@ -69,6 +71,24 @@ class _TournamentPageState extends State<TournamentPage> {
                   border: OutlineInputBorder(),
                 ),
                 validator: (value) => value!.isEmpty ? 'Enter turf name' : null,
+              ),
+               SizedBox(height: 16.h),
+               TextFormField(
+                controller: _committeenameController,
+                decoration: const InputDecoration(
+                  labelText: 'Commitee person name',
+                  border: OutlineInputBorder(),
+                ),
+                validator: (value) => value!.isEmpty ? 'Enter Commitee person name' : null,
+              ),
+               SizedBox(height: 16.h),
+               TextFormField(
+                controller: _commiteenumberController,
+                decoration: const InputDecoration(
+                  labelText: 'Member Phone number',
+                  border: OutlineInputBorder(),
+                ),
+                validator: (value) => value!.isEmpty ? 'Enter Phone number' : null,
               ),
                SizedBox(height: 16.h),
               TextFormField(
@@ -117,7 +137,16 @@ class _TournamentPageState extends State<TournamentPage> {
                 height: 48.h,
                 child: ElevatedButton.icon(
                   onPressed:() async{
-                  await  addTournament(_turfNameController.text, _dateController.text,_tournamentNameController.text,_turfentryfeeController.text,_turffirstController.text,_turfsecondController.text);
+                  await  addTournament(
+                    _turfNameController.text,
+                     _dateController.text,
+                     _tournamentNameController.text,
+                     _turfentryfeeController.text,
+                     _turffirstController.text,
+                     _turfsecondController.text,
+                     _committeenameController.text,
+                     _commiteenumberController.text
+                     );
                   Navigator.pop(context);
                   },
                   icon: _isLoading

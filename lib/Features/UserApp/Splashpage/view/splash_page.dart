@@ -6,6 +6,7 @@ import 'package:medical_app/Features/AdminApp/homepage/view/admin_homepage.dart'
 import 'package:medical_app/Features/UserApp/Bottomnav/view/bottomnav.dart';
 import 'package:medical_app/Features/VendorApp/bottomnav/view/vendor_bottomnav.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:video_player/video_player.dart';
 
 class SplashPage extends StatefulWidget {
   const SplashPage({super.key});
@@ -15,10 +16,23 @@ class SplashPage extends StatefulWidget {
 }
 
 class _SplashPageState extends State<SplashPage> {
+  late VideoPlayerController _videoController;
+
   @override
   void initState() {
     super.initState();
-    Timer(const Duration(seconds: 3), () async {
+
+    // 🎥 Initialize video
+    _videoController = VideoPlayerController.asset('assets/videos/bg.mp4')
+      ..initialize().then((_) {
+        _videoController
+          ..setLooping(true)
+          ..setVolume(0)
+          ..play();
+        setState(() {});
+      });
+
+    Timer(const Duration(seconds: 4), () async {
       final prefs = await SharedPreferences.getInstance();
       String? uid = prefs.getString("uid");
       String? role = prefs.getString("role");
@@ -33,7 +47,6 @@ class _SplashPageState extends State<SplashPage> {
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (_) => VendorBotomnav()),
-            
           );
         } else if (role == "admin") {
           Navigator.pushReplacement(
@@ -51,69 +64,78 @@ class _SplashPageState extends State<SplashPage> {
   }
 
   @override
+  void dispose() {
+    // TODO: implement dispose
+    _videoController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
-
-        // 🔹 Background Gradient
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              Color.fromARGB(255, 13, 161, 25), // Dark Blue
-              Color.fromARGB(255, 66, 245, 132), // Light Blue
-            ],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
+      body: Stack(
+        children: [
+          // 🎥 Video Background
+          SizedBox.expand(
+            child:
+                _videoController.value.isInitialized
+                    ? FittedBox(
+                      fit: BoxFit.cover,
+                      child: SizedBox(
+                        width: _videoController.value.size.width,
+                        height: _videoController.value.size.height,
+                        child: VideoPlayer(_videoController),
+                      ),
+                    )
+                    : const SizedBox(),
           ),
-        ),
 
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // 🔹 Logo / Turf Icon
-            Container(
-              height: 120.h,
-              width: 120.w,
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.2),
-                shape: BoxShape.circle,
-                border: Border.all(color: Colors.white, width: 2.w),
-              ),
-              child: Center(child: Image.asset("assets/images/logo.png")),
+          // 🌑 Overlay for readability
+          Container(color: Colors.black.withOpacity(0.4)),
+
+          // 🌟 Splash Content
+          Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // Logo
+                Container(
+                  height: 120.h,
+                  width: 120.w,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.2),
+                    shape: BoxShape.circle,
+                    border: Border.all(color: Colors.white, width: 2.w),
+                  ),
+                  child: Center(child: Image.asset("assets/images/logo.png")),
+                ),
+
+                SizedBox(height: 25.h),
+
+                Text(
+                  "TurfBook",
+                  style: TextStyle(
+                    fontSize: 32.sp,
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1.5,
+                  ),
+                ),
+
+                SizedBox(height: 10.h),
+
+                Text(
+                  "Find • Book • Play",
+                  style: TextStyle(fontSize: 16.sp, color: Colors.white70),
+                ),
+
+                SizedBox(height: 40.h),
+
+               
+              ],
             ),
-
-            SizedBox(height: 25.w),
-
-            // 🔹 App p
-            Text(
-              "TurfBook",
-              style: TextStyle(
-                fontSize: 32.sp,
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-                letterSpacing: 1.5,
-              ),
-            ),
-
-            SizedBox(height: 10.h),
-
-            // 🔹 Tagline
-            Text(
-              "Find • Book • Play",
-              style: TextStyle(fontSize: 16.sp, color: Colors.white70),
-            ),
-
-            SizedBox(height: 40.h),
-
-            // 🔹 Loading Indicator
-            CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-              strokeWidth: 3.w,
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

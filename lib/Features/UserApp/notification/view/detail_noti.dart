@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class DetailNoti extends StatelessWidget {
   final String name;
@@ -8,6 +9,8 @@ class DetailNoti extends StatelessWidget {
   final String secondPrize;
   final String groundFee;
   final String createdAt;
+  final String member;
+  final String number;
 
   const DetailNoti({
     super.key,
@@ -18,6 +21,8 @@ class DetailNoti extends StatelessWidget {
     required this.secondPrize,
     required this.groundFee,
     required this.createdAt,
+    required this.member,
+    required this.number,
   });
 
   @override
@@ -37,7 +42,6 @@ class DetailNoti extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              
               // HEADER CARD
               Container(
                 decoration: BoxDecoration(
@@ -48,7 +52,7 @@ class DetailNoti extends StatelessWidget {
                       color: Colors.black12,
                       blurRadius: 6,
                       offset: Offset(0, 3),
-                    )
+                    ),
                   ],
                 ),
                 padding: EdgeInsets.all(20),
@@ -67,10 +71,7 @@ class DetailNoti extends StatelessWidget {
                       children: [
                         Icon(Icons.sports_soccer, color: Colors.green),
                         SizedBox(width: 6),
-                        Text(
-                          turfname,
-                          style: TextStyle(fontSize: 16),
-                        ),
+                        Text(turfname, style: TextStyle(fontSize: 16)),
                       ],
                     ),
                     SizedBox(height: 12),
@@ -78,17 +79,14 @@ class DetailNoti extends StatelessWidget {
                       children: [
                         Icon(Icons.calendar_month, color: Colors.blue),
                         SizedBox(width: 6),
-                        Text(
-                          date,
-                          style: TextStyle(fontSize: 16),
-                        ),
+                        Text(date, style: TextStyle(fontSize: 16)),
                       ],
                     ),
                   ],
                 ),
               ),
 
-              SizedBox(height: 20),
+              SizedBox(height: 20.h),
 
               // PRIZES CARD
               _sectionCard(
@@ -97,6 +95,12 @@ class DetailNoti extends StatelessWidget {
                   _tile("1st Prize", "₹$firstPrize"),
                   _tile("2nd Prize", "₹$secondPrize"),
                 ],
+              ),
+              SizedBox(height: 20.h),
+
+              _sectionCard(
+                title: "Commitee",
+                children: [_tile("Member", member), _tile("Number", number)],
               ),
 
               SizedBox(height: 20),
@@ -111,8 +115,6 @@ class DetailNoti extends StatelessWidget {
               ),
 
               SizedBox(height: 30),
-              
-             
             ],
           ),
         ),
@@ -134,10 +136,12 @@ class DetailNoti extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(title,
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+          Text(
+            title,
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          ),
           SizedBox(height: 16),
-          ...children
+          ...children,
         ],
       ),
     );

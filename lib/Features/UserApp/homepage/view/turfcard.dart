@@ -76,7 +76,11 @@ class TurfCard extends StatelessWidget {
                           ),
                         ),
                       ),
-                      Icon(Icons.favorite_border, size: 16.sp),
+                      Icon(Icons.star, size: 16.sp, color: Colors.amberAccent),
+                      Text(
+                        "4.1",
+                        style: TextStyle(fontSize: 12.sp),
+                      ),
                     ],
                   ),
 
@@ -88,11 +92,7 @@ class TurfCard extends StatelessWidget {
                           style: TextStyle(fontSize: 12.sp),
                         ),
                       ),
-                      Icon(Icons.star, size: 16.sp, color: Colors.amberAccent),
-                      Text(
-                        "4.1",
-                        style: TextStyle(fontSize: 12.sp),
-                      ),
+                      Icon(Icons.location_on_outlined,size: 15,)
                     ],
                   ),
                 ],

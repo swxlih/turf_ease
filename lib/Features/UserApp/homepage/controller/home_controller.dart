@@ -8,7 +8,7 @@ class HomeController extends ChangeNotifier {
   List<Map<String, dynamic>> filteredTurfs = [];
 
   int selectedIndex = 0;
-  final List<String> categories = ["All", "Football", "Cricket", "Badminton"];
+  final List<String> categories = ["All", "Football", "Cricket", "Badminton","Soapy Football"];
 
   HomeController() {
     fetchTurfs();

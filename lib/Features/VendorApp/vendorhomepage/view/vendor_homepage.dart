@@ -30,6 +30,24 @@ class _VendorHomepageState extends State<VendorHomepage> {
         .snapshots();
   }
 
+
+  Future<void> deleteBooking(String bookingId) async {
+  final user = _auth.currentUser;
+  if (user == null) return;
+
+  await _firestore
+      .collection('turfbookings')
+      .doc(user.uid)
+      .collection('bookings')
+      .doc(bookingId)
+      .delete();
+
+  ScaffoldMessenger.of(context).showSnackBar(
+    const SnackBar(content: Text("Booking deleted successfully")),
+  );
+}
+
+
   Widget _filterTab(String label, int index) {
     final bool isSelected = selectedtab == index;
 
@@ -63,12 +81,7 @@ class _VendorHomepageState extends State<VendorHomepage> {
       appBar: AppBar(
         title: const Text("Turf Owner Dashboard"),
         backgroundColor: Colors.green,
-        actions: [
-          Padding(
-            padding: EdgeInsets.only(right: 12.w),
-            child: const Icon(Icons.logout),
-          ),
-        ],
+        
       ),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(16.w),
@@ -263,15 +276,25 @@ class _VendorHomepageState extends State<VendorHomepage> {
                                 ),
                             ],
                           ),
-                          trailing: Text(
-                            booking['status'],
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color:
-                                  booking['status'] == 'booked'
-                                      ? Colors.green
-                                      : Colors.red,
-                            ),
+                          trailing: Column(
+                            children: [
+                              Expanded(child: GestureDetector(
+                                onTap: () {
+                                  deleteBooking(booking.id);
+                                },
+                                child: Icon(Icons.delete,size: 20.sp,color: Colors.red,))),
+
+                              Text(
+                                booking['status'],
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color:
+                                      booking['status'] == 'booked'
+                                          ? Colors.green
+                                          : Colors.red,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ),

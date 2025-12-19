@@ -37,6 +37,10 @@ class UserbookingDetail extends StatelessWidget {
         elevation: 0,
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
+        actions: [
+          Icon(Icons.delete,color: Colors.red,)
+        ],
+        actionsPadding: EdgeInsets.only(right: 20.w),
       ),
 
       body: SingleChildScrollView(

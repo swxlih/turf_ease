@@ -60,6 +60,7 @@ class AuthService extends ChangeNotifier {
                       "Football": false,
                       "Cricket": false,
                       "Badminton": false,
+                      "Soapy Football": false,
                     },
 
                   //rentals
@@ -215,4 +216,25 @@ class AuthService extends ChangeNotifier {
       (Route<dynamic> route) => false,
     );
   }
+
+   Future<void> forgotPassword({
+    required String email,
+    required BuildContext context,
+  }) async {
+    try {
+      await _auth.sendPasswordResetEmail(email: email);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Password reset link sent to your email"),
+        ),
+      );
+    } on FirebaseAuthException catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.message ?? "Something went wrong")),
+      );
+    }
+  }
+
+
 }

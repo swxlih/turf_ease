@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:medical_app/Auth/authservice/auth_service.dart';
+import 'package:medical_app/Auth/view/forgot_pasword.dart';
 import 'package:medical_app/Auth/view/register_page.dart';
 import 'package:medical_app/widgets/custom_button.dart';
 import 'package:medical_app/widgets/custom_textformfield.dart';
@@ -44,7 +45,7 @@ class _LoginPageState extends State<LoginPage> {
               SizedBox(height: 15.h),
 
               // Title
-              Center(
+              Center( 
                 child: Padding(
                   padding: EdgeInsets.symmetric(horizontal: 15.w),
                   child: Text(
@@ -98,6 +99,23 @@ class _LoginPageState extends State<LoginPage> {
                   },
                   
                 ),
+              ),
+
+              Padding(
+                padding:  EdgeInsets.only(right: 19.w,top: 10.h),
+                child: Align(
+                  alignment: Alignment.centerRight,
+                  child: InkWell(
+                    onTap: () {
+                       Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => const ForgotPasswordPage(),
+        ),
+      );
+                    },
+                    child: Text("Forgot Password?"))),
+                  
               ),
 
               SizedBox(height: 40.h),

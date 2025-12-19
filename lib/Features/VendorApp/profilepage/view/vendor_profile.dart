@@ -56,6 +56,7 @@ class _VendorProfileState extends State<VendorProfile> {
               "Football": gameData['Football'] ?? false,
               "Cricket": gameData['Cricket'] ?? false,
               "Badminton": gameData['Badminton'] ?? false,
+              "Soapy Football":gameData['Soapy Football'] ?? false,
             };
 
             setState(() {
