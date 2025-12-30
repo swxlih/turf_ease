@@ -8,6 +8,7 @@ class CustomTextFormField extends StatelessWidget {
   final bool obscure;
   final String? Function(String?)? validator;
   final String? errorText; // <-- backend error support
+  final IconButton? suffixIcon;
 
   const CustomTextFormField({
     super.key,
@@ -17,6 +18,7 @@ class CustomTextFormField extends StatelessWidget {
     this.obscure = false,
     this.validator,
     this.errorText, // <-- add here
+    this.suffixIcon
   });
 
   @override
@@ -33,7 +35,7 @@ class CustomTextFormField extends StatelessWidget {
           controller: controller,
           obscureText: obscure,
           decoration: _inputDecoration(hint).copyWith(
-            errorText: errorText, // <-- shows backend error
+            errorText: errorText, // <--  shows backend error
           ),
           validator: validator,
         ),
@@ -46,6 +48,7 @@ class CustomTextFormField extends StatelessWidget {
       filled: true,
       fillColor: const Color(0x40D9D9D9),
       hintText: hint,
+      suffixIcon:suffixIcon,
       hintStyle: TextStyle(
         color: Colors.grey,
         fontWeight: FontWeight.w300,

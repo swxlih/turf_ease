@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:medical_app/Features/VendorApp/Reviewpage/view/review_page.dart';
 import 'package:medical_app/Features/VendorApp/profilepage/view/vendor_profile.dart';
 import 'package:medical_app/Features/VendorApp/vendorhomepage/view/vendor_homepage.dart';
 
@@ -25,7 +26,7 @@ class _VendorBotomnavState extends State<VendorBotomnav> {
   }
  List<Widget> get screens => [
         VendorHomepage(),
-       
+        ReviewPage(),
         VendorProfile()   
       ];  
 
@@ -45,6 +46,11 @@ class _VendorBotomnavState extends State<VendorBotomnav> {
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
             label: 'Home',
+          ),
+
+          BottomNavigationBarItem(
+            icon: Icon(Icons.reviews),
+            label: 'Reviews',
           ),
          
           BottomNavigationBarItem(

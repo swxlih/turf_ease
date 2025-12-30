@@ -107,7 +107,7 @@ class _SplashPageState extends State<SplashPage> {
                     shape: BoxShape.circle,
                     border: Border.all(color: Colors.white, width: 2.w),
                   ),
-                  child: Center(child: Image.asset("assets/images/logo.png")),
+                  child: Center(child: Image.asset("assets/images/logo1.png")),
                 ),
 
                 SizedBox(height: 25.h),

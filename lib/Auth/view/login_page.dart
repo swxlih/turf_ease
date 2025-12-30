@@ -19,6 +19,7 @@ class _LoginPageState extends State<LoginPage> {
   final authSrevice = AuthService();
   bool _isLoading = false;
   final _formKey = GlobalKey<FormState>();
+  bool _obscurepassword = true;
   // String? passwordError;
 
   @override
@@ -45,7 +46,7 @@ class _LoginPageState extends State<LoginPage> {
               SizedBox(height: 15.h),
 
               // Title
-              Center( 
+              Center(
                 child: Padding(
                   padding: EdgeInsets.symmetric(horizontal: 15.w),
                   child: Text(
@@ -84,6 +85,7 @@ class _LoginPageState extends State<LoginPage> {
                   },
                 ),
               ),
+
               SizedBox(height: 15.h),
 
               Padding(
@@ -92,30 +94,35 @@ class _LoginPageState extends State<LoginPage> {
                   label: "Password",
                   hint: "Enter Your Password",
                   controller: _passwordController,
-                  obscure: true,
+                  obscure: _obscurepassword,
                   validator: (v) {
                     if (v == null || v.isEmpty) return "Enter your password";
                     return null;
                   },
-                  
+                  suffixIcon: IconButton(
+                    onPressed: (){
+                    setState(() { });
+                  _obscurepassword = !_obscurepassword;
+                  }, icon: Icon(_obscurepassword ? Icons.visibility_off : Icons.visibility)),
                 ),
               ),
 
               Padding(
-                padding:  EdgeInsets.only(right: 19.w,top: 10.h),
+                padding: EdgeInsets.only(right: 19.w, top: 10.h),
                 child: Align(
                   alignment: Alignment.centerRight,
                   child: InkWell(
                     onTap: () {
-                       Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => const ForgotPasswordPage(),
-        ),
-      );
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const ForgotPasswordPage(),
+                        ),
+                      );
                     },
-                    child: Text("Forgot Password?"))),
-                  
+                    child: Text("Forgot Password?"),
+                  ),
+                ),
               ),
 
               SizedBox(height: 40.h),
@@ -131,10 +138,9 @@ class _LoginPageState extends State<LoginPage> {
 
                     setState(() {
                       _isLoading = true;
-                     
                     });
 
-                     await authSrevice.loginUser(
+                    await authSrevice.loginUser(
                       emailController: _emailController.text,
                       passwordController: _passwordController.text,
                       context: context,
@@ -143,8 +149,6 @@ class _LoginPageState extends State<LoginPage> {
                     setState(() {
                       _isLoading = false;
                     });
-
-                   
                   },
                 ),
               ),

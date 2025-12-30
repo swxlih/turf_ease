@@ -39,6 +39,8 @@ class _RegisterPageState extends State<RegisterPage>
   final TextEditingController _ownerNumberController = TextEditingController();
   final TextEditingController _ownerPasswordController =
       TextEditingController();
+  final TextEditingController _ownerconfirmPasswordController =
+      TextEditingController();
   final TextEditingController _ownerlocationController =
       TextEditingController();
   final TextEditingController _ownerAddressController = TextEditingController();
@@ -46,6 +48,10 @@ class _RegisterPageState extends State<RegisterPage>
       TextEditingController();
   final TextEditingController _ownereveningrateController =
       TextEditingController();
+  bool _obscurepassword = true;
+  bool _obscure2 = true;
+  bool _obscure3 = true;
+  bool _obscure4 = true;
 
   File? _pickedImage;
   final ImagePicker _picker = ImagePicker();
@@ -185,10 +191,21 @@ class _RegisterPageState extends State<RegisterPage>
                     label: "Password",
                     hint: "Enter your password",
                     controller: _userPasswordController,
-                    obscure: true,
+                    obscure: _obscurepassword,
                     validator:
                         (value) =>
                             value!.length < 6 ? "Min 6 characters" : null,
+                    suffixIcon: IconButton(
+                      onPressed: () {
+                        setState(() {});
+                        _obscurepassword = !_obscurepassword;
+                      },
+                      icon: Icon(
+                        _obscurepassword
+                            ? Icons.visibility_off
+                            : Icons.visibility,
+                      ),
+                    ),
                   ),
                   SizedBox(height: 15.h),
 
@@ -196,7 +213,7 @@ class _RegisterPageState extends State<RegisterPage>
                     label: "Confirm Password",
                     hint: "Confirm your password",
                     controller: _userconfirmPasswordController,
-                    obscure: true,
+                    obscure: _obscure2,
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return "Please confirm your password";
@@ -206,6 +223,15 @@ class _RegisterPageState extends State<RegisterPage>
                       }
                       return null;
                     },
+                    suffixIcon: IconButton(
+                      onPressed: () {
+                        setState(() {});
+                        _obscure2 = !_obscure2;
+                      },
+                      icon: Icon(
+                        _obscure2 ? Icons.visibility_off : Icons.visibility,
+                      ),
+                    ),
                   ),
                   SizedBox(height: 30.h),
 
@@ -339,12 +365,48 @@ class _RegisterPageState extends State<RegisterPage>
                     label: "Password",
                     hint: "Enter your password",
                     controller: _ownerPasswordController,
-                    obscure: true,
+                    obscure: _obscure3,
                     validator:
                         (value) =>
                             value!.length < 6 ? "Min 6 characters" : null,
+                    suffixIcon: IconButton(
+                      onPressed: () {
+                        setState(() {});
+                        _obscure3 = !_obscure3;
+                      },
+                      icon: Icon(
+                        _obscure3 ? Icons.visibility_off : Icons.visibility,
+                      ),
+                    ),
                   ),
                   SizedBox(height: 15.h),
+
+                  CustomTextFormField(
+                    label: "Confirm Password",
+                   hint: "Confirm Your Password",
+                    controller: _ownerconfirmPasswordController,
+                    obscure: _obscure4,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return "Please confirm your password";
+                      }
+                      if (value != _ownerPasswordController.text) {
+                        return "Passwords do not match";
+                      }
+                      return null;
+                    },
+                    suffixIcon: IconButton(
+                      onPressed: () {
+                        setState(() {});
+                        _obscure4 = !_obscure4;
+                      },
+                      icon: Icon(
+                        _obscure4 ? Icons.visibility_off : Icons.visibility,
+                      ),
+                    ),
+                  ),
+
+                    SizedBox(height: 15.h),
 
                   CustomTextFormField(
                     label: "City",

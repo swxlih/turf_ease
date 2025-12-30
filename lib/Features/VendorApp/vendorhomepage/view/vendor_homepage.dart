@@ -131,6 +131,7 @@ class _VendorHomepageState extends State<VendorHomepage> {
               final endTime = (lastSlot["endTime"] as Timestamp).toDate();
 
               if (endTime.isBefore(now)) {
+                finishedCount++;
                 finished.add(doc);
               } else {
                 upcomingCount++;
