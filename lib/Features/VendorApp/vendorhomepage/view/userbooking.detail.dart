@@ -11,6 +11,7 @@ class UserbookingDetail extends StatelessWidget {
   final String? userName;
   final String? userNumber;
   final List<Map<String, dynamic>>? slots;
+  final Map<String, dynamic>? rentals;
 
   const UserbookingDetail({
     super.key,
@@ -23,6 +24,7 @@ class UserbookingDetail extends StatelessWidget {
     required this.userName,
     required this.userNumber,
     required this.slots,
+    this.rentals,
   });
 
   Color get statusColor =>
@@ -115,6 +117,35 @@ class UserbookingDetail extends StatelessWidget {
             ),
 
             SizedBox(height: 20),
+
+            if (rentals != null && rentals!.isNotEmpty)
+              _sectionCard(
+                title: "Rental Details",
+                children: [
+                   if (rentals!['boots'] != null)
+                    ... (rentals!['boots'] as Map<String, dynamic>).entries.map((entry) {
+                      String size = entry.key;
+                      var details = entry.value;
+                      return _tile(
+                        "Boots (Size $size)",
+                        "x${details['count']} - ₹${details['price']}",
+                      );
+                    }).toList(),
+                  if (rentals!['bats'] != null)
+                    _tile(
+                      "Cricket Bats",
+                      "x${rentals!['bats']['count']} - ₹${rentals!['bats']['price']}",
+                    ),
+                  if (rentals!['rackets'] != null)
+                    _tile(
+                      "Badminton Rackets",
+                      "x${rentals!['rackets']['count']} - ₹${rentals!['rackets']['price']}",
+                    ),
+                ],
+              ),
+
+            SizedBox(height: 20),
+            
 
             _sectionCard(
               title: "Booked Slots",

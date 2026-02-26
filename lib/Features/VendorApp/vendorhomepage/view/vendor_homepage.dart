@@ -26,7 +26,7 @@ class _VendorHomepageState extends State<VendorHomepage> {
     return _firestore
         .collection('turfbookings')
         .doc(user.uid)
-        .collection('bookings')
+        .collection('bookings').orderBy("createdAt",descending: true)
         .snapshots();
   }
 
@@ -41,6 +41,8 @@ class _VendorHomepageState extends State<VendorHomepage> {
       .collection('bookings')
       .doc(bookingId)
       .delete();
+
+      if (context.mounted)
 
   ScaffoldMessenger.of(context).showSnackBar(
     const SnackBar(content: Text("Booking deleted successfully")),
@@ -191,7 +193,8 @@ class _VendorHomepageState extends State<VendorHomepage> {
                   shrinkWrap: true,
                   itemBuilder: (context, index) {
                     final booking = displayList[index];
-                    final dateField = booking["date"];
+                    final data = booking.data() as Map<String, dynamic>;
+                    final dateField = data["date"];
                     String formattedDate = "";
 
                     if (dateField is Timestamp) {
@@ -204,7 +207,7 @@ class _VendorHomepageState extends State<VendorHomepage> {
                     return GestureDetector(
                       onTap: () {
                         List<Map<String, dynamic>> slotList =
-                            (booking['slots'] as List<dynamic>)
+                            (data['slots'] as List<dynamic>)
                                 .map((e) => Map<String, dynamic>.from(e))
                                 .toList();
                         Navigator.push(
@@ -212,15 +215,16 @@ class _VendorHomepageState extends State<VendorHomepage> {
                           MaterialPageRoute(
                             builder:
                                 (context) => UserbookingDetail(
-                                  turfName: booking['turfname'],
-                                  turfImage: booking['turfimage'],
+                                  turfName: data['turfname'],
+                                  turfImage: data['turfimage'],
                                   date: formattedDate,
-                                  rate: booking['rate'],
-                                  paymentId: booking['paymentId'],
-                                  status: booking['status'],
-                                  userName: booking['username'],
-                                  userNumber: booking['usernumber'],
+                                  rate: data['rate'],
+                                  paymentId: data['paymentId'],
+                                  status: data['status'],
+                                  userName: data['username'],
+                                  userNumber: data['usernumber'],
                                   slots: slotList,
+                                  rentals: data['rentals'],
                                 ),
                           ),
                         );
@@ -236,7 +240,7 @@ class _VendorHomepageState extends State<VendorHomepage> {
                             color: Colors.green,
                           ),
                           title: Text(
-                            booking['username'],
+                            data['username'],
                             style: const TextStyle(fontWeight: FontWeight.bold),
                           ),
                           subtitle: Column(
@@ -250,12 +254,12 @@ class _VendorHomepageState extends State<VendorHomepage> {
                                 ),
                               ),
                               SizedBox(height: 4.h),
-                              if (booking["slots"] != null &&
-                                  (booking["slots"] as List).isNotEmpty)
+                              if (data["slots"] != null &&
+                                  (data["slots"] as List).isNotEmpty)
                                 ...List.generate(
-                                  (booking["slots"] as List).length,
+                                  (data["slots"] as List).length,
                                   (i) {
-                                    final slot = booking["slots"][i];
+                                    final slot = data["slots"][i];
                                     return Row(
                                       children: [
                                         const Icon(
@@ -286,11 +290,11 @@ class _VendorHomepageState extends State<VendorHomepage> {
                                 child: Icon(Icons.delete,size: 20.sp,color: Colors.red,))),
 
                               Text(
-                                booking['status'],
+                                data['status'],
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   color:
-                                      booking['status'] == 'booked'
+                                      data['status'] == 'booked'
                                           ? Colors.green
                                           : Colors.red,
                                 ),

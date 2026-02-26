@@ -3,7 +3,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:medical_app/Auth/authservice/auth_service.dart';
-import 'package:medical_app/Auth/model/usermodel.dart';
 import 'package:medical_app/Auth/view/login_page.dart';
 import 'package:medical_app/Features/VendorApp/Editprofile/view/edit_profile.dart';
 import 'package:medical_app/Features/VendorApp/addbooking/view/vendor_bookadd.dart';
@@ -72,6 +71,7 @@ class _VendorProfileState extends State<VendorProfile> {
       }
     } catch (e) {
       debugPrint("Error fetching admin details: $e");
+      if (!mounted) return;
       setState(() => isLoading = false);
     }
   }

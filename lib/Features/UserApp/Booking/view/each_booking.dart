@@ -46,13 +46,12 @@ class _TurfBookingPageState extends State<TurfBookingPage> {
   int totalPrice = 0;
   Map<String, dynamic>? rentals;
   bool loading = true;
-  String? selectedBootSize;
+  Map<String, int> selectedBootSizes = {}; // size -> count
   bool rentBat = false;
   bool rentRacket = false;
   bool loadingrentals = true;
   int batCount = 0;
   int racketCount = 0;
-  int bootCount = 0;
 
   Future<void> fetchTurfRentals() async {
     try {
@@ -76,12 +75,14 @@ class _TurfBookingPageState extends State<TurfBookingPage> {
   num calculateRentalPrice() {
     num total = 0;
 
-    // Boots - check if rentals and nested paths exist
-    if (selectedBootSize != null &&
-        rentals != null &&
+    // Boots multi-size calculation
+    if (rentals != null &&
         rentals!.containsKey("football") &&
         rentals!["football"]["boots"] != null) {
-      total += bootCount * (rentals!["football"]["boots"]["price"] ?? 0);
+      int bootPrice = rentals!["football"]["boots"]["price"] ?? 0;
+      selectedBootSizes.forEach((size, count) {
+        total += count * bootPrice;
+      });
     }
 
     // Cricket Bat - check if exists
@@ -261,12 +262,20 @@ class _TurfBookingPageState extends State<TurfBookingPage> {
 
       // Prepare rental details
       Map<String, dynamic> rentalDetails = {};
-      if (bootCount > 0 && selectedBootSize != null) {
-        rentalDetails['boots'] = {
-          'count': bootCount,
-          'size': selectedBootSize,
-          'price': rentals!["football"]["boots"]["price"] * bootCount,
-        };
+      if (selectedBootSizes.isNotEmpty) {
+        int bootPrice = rentals!["football"]["boots"]["price"] ?? 0;
+        Map<String, dynamic> bootDetails = {};
+        selectedBootSizes.forEach((size, count) {
+          if (count > 0) {
+            bootDetails[size] = {
+              'count': count,
+              'price': count * bootPrice,
+            };
+          }
+        });
+        if (bootDetails.isNotEmpty) {
+          rentalDetails['boots'] = bootDetails;
+        }
       }
       if (batCount > 0) {
         rentalDetails['bats'] = {
@@ -455,79 +464,81 @@ class _TurfBookingPageState extends State<TurfBookingPage> {
                           Text(
                             "Price: ₹${rentals!["football"]["boots"]["price"]} per boot",
                           ),
-                          SizedBox(height: 8.h),
-                          if (selectedBootSize == null)
-                            ElevatedButton(
-                              onPressed: () {
-                                // Show size selection dialog
-                                showDialog(
-                                  context: context,
-                                  builder: (context) {
-                                    return AlertDialog(
-                                      title: Text("Select Boot Size"),
-                                      content: Column(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: (rentals!["football"]["boots"]
-                                                    ["sizes"] as Map)
-                                            .keys
-                                            .map<Widget>((size) {
-                                          return ListTile(
-                                            title: Text("Size $size"),
-                                            subtitle: Text(
-                                              "Available: ${rentals!["football"]["boots"]["sizes"][size]}",
-                                            ),
-                                            onTap: () {
+                          SizedBox(height: 12.h),
+                          ElevatedButton.icon(
+                            icon: Icon(Icons.add_shopping_cart),
+                            onPressed: () {
+                              // Show size selection dialog
+                              showDialog(
+                                context: context,
+                                builder: (context) {
+                                  return AlertDialog(
+                                    title: Text("Select Boot Size"),
+                                    content: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: (rentals!["football"]["boots"]
+                                                  ["sizes"] as Map)
+                                          .keys
+                                          .map<Widget>((size) {
+                                        return ListTile(
+                                          title: Text("Size $size"),
+                                          subtitle: Text(
+                                            "Available: ${rentals!["football"]["boots"]["sizes"][size]}",
+                                          ),
+                                          onTap: () {
+                                            if (!selectedBootSizes.containsKey(size.toString())) {
                                               setState(() {
-                                                selectedBootSize = size;
+                                                selectedBootSizes[size.toString()] = 1;
                                               });
-                                              Navigator.pop(context);
-                                            },
-                                          );
-                                        }).toList(),
-                                      ),
-                                    );
-                                  },
-                                );
-                              },
-                              child: Text("Select Size"),
-                            )
-                          else ...[
-                            Text("Selected Size: $selectedBootSize"),
-                            Row(
-                              children: [
-                                Text("Quantity: "),
-                                Spacer(),
-                                IconButton(
-                                  icon: Icon(Icons.remove),
-                                  onPressed: () {
-                                    if (bootCount > 0) {
-                                      setState(() => bootCount--);
-                                    }
-                                  },
+                                            }
+                                            Navigator.pop(context);
+                                          },
+                                        );
+                                      }).toList(),
+                                    ),
+                                  );
+                                },
+                              );
+                            },
+                            label: Text("Add Size"),
+                          ),
+                          if (selectedBootSizes.isNotEmpty) ...[
+                            SizedBox(height: 12.h),
+                            ...selectedBootSizes.entries.map((entry) {
+                              String size = entry.key;
+                              int count = entry.value;
+                              int maxAvailable = rentals!["football"]["boots"]["sizes"][size] ?? 0;
+                              return Padding(
+                                padding: EdgeInsets.symmetric(vertical: 4.h),
+                                child: Row(
+                                  children: [
+                                    Text("Size $size", style: TextStyle(fontWeight: FontWeight.w500)),
+                                    Spacer(),
+                                    IconButton(
+                                      icon: Icon(Icons.remove_circle_outline, color: Colors.red, size: 20.sp),
+                                      onPressed: () {
+                                        setState(() {
+                                          if (count > 1) {
+                                            selectedBootSizes[size] = count - 1;
+                                          } else {
+                                            selectedBootSizes.remove(size);
+                                          }
+                                        });
+                                      },
+                                    ),
+                                    Text("$count", style: TextStyle(fontSize: 14.sp)),
+                                    IconButton(
+                                      icon: Icon(Icons.add_circle_outline, color: Colors.green, size: 20.sp),
+                                      onPressed: () {
+                                        if (count < maxAvailable) {
+                                          setState(() => selectedBootSizes[size] = count + 1);
+                                        }
+                                      },
+                                    ),
+                                  ],
                                 ),
-                                Text("$bootCount"),
-                                IconButton(
-                                  icon: Icon(Icons.add),
-                                  onPressed: () {
-                                    int maxAvailable =
-                                        rentals!["football"]["boots"]["sizes"]
-                                            [selectedBootSize];
-                                    if (bootCount < maxAvailable) {
-                                      setState(() => bootCount++);
-                                    }
-                                  },
-                                ),
-                              ],
-                            ),
-                            TextButton(
-                              onPressed: () {
-                                setState(() {
-                                  selectedBootSize = null;
-                                  bootCount = 0;
-                                });
-                              },
-                              child: Text("Change Size"),
-                            ),
+                              );
+                            }).toList(),
                           ],
                         ],
                       ),

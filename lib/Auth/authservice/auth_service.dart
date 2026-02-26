@@ -115,7 +115,7 @@ class AuthService extends ChangeNotifier {
     required String passwordController,
     required BuildContext context,
   }) async {
-    try {
+    try {    
       // 🔥 STEP 1: Custom Admin Login BEFORE Firebase
       if (emailController.trim() == "admin@gmail.com" &&
           passwordController.trim() == "Admin@123") {

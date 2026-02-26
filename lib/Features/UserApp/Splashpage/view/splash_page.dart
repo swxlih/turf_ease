@@ -4,7 +4,9 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:medical_app/Auth/view/login_page.dart';
 import 'package:medical_app/Features/AdminApp/homepage/view/admin_homepage.dart';
 import 'package:medical_app/Features/UserApp/Bottomnav/view/bottomnav.dart';
+import 'package:medical_app/Features/UserApp/provider/user_provider.dart';
 import 'package:medical_app/Features/VendorApp/bottomnav/view/vendor_bottomnav.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:video_player/video_player.dart';
 
@@ -39,6 +41,9 @@ class _SplashPageState extends State<SplashPage> {
 
       if (uid != null && role != null) {
         if (role == "user") {
+          // Initialize UserProvider before navigating
+          await Provider.of<UserProvider>(context, listen: false).fetchUserData(uid);
+          
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (_) => BottomNav()),

@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:medical_app/Features/UserApp/Booking/view/each_booking.dart';
+import 'package:medical_app/helper/call_helper.dart';
 
 class TurfDetailPage extends StatefulWidget {
   final String imageUrl;
@@ -72,14 +73,17 @@ class _TurfDetailPageState extends State<TurfDetailPage> {
               .doc(widget.ownerUid)
               .collection('reviews')
               .get();
+        
 
       reviews =
           reviewSnapshot.docs.map((doc) {
+            final data = doc.data();
             return {
               'comment': doc['comment'] ?? '',
               'rating': doc['rating'] ?? 0,
               'userid': doc['userid'] ?? '',
               'username': doc['username'] ?? '',
+              'reply': data['reply'] ?? '',
             };
           }).toList();
 
@@ -252,9 +256,11 @@ class _TurfDetailPageState extends State<TurfDetailPage> {
                         if (ownerNumber.isNotEmpty)
                           IconButton(
                             icon: const Icon(Icons.call),
-                            onPressed: () {},
+                            onPressed: () {
+                              // Implement call functionality here, e.g. using url_launcher
+                              CallHelper().makePhoneCall(ownerNumber);
+                            },
                           ),
-                      
                       ],
                     ),
                     SizedBox(height: 16.h),
@@ -318,85 +324,134 @@ class _TurfDetailPageState extends State<TurfDetailPage> {
                       ),
                     ),
 
-                   ListView.builder(
-  shrinkWrap: true,
-  physics: NeverScrollableScrollPhysics(),
-  itemCount: reviews.length,
-  itemBuilder: (context, index) {
-    final r = reviews[index];
+                    ListView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: reviews.length,
+                      itemBuilder: (context, index) {
+                        final r = reviews[index];
+                        final bool hasReply =
+                            (r['reply'] ?? '').toString().isNotEmpty;
 
-    return Container(
-      margin: EdgeInsets.only(bottom: 12),
-      padding: EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black12,
-            blurRadius: 6,
-            spreadRadius: 1,
-            offset: Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          /// TOP ROW → Icon | Name | Rating stars
-          Row(
-            children: [
-              CircleAvatar(
-                radius: 20,
-                backgroundColor: Colors.grey.shade200,
-                child: Icon(Icons.person, color: Colors.grey, size: 26),
-              ),
-              SizedBox(width: 12),
+                        return Container(
+                          margin: const EdgeInsets.only(bottom: 12),
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(14),
+                            boxShadow: const [
+                              BoxShadow(
+                                color: Colors.black12,
+                                blurRadius: 6,
+                                spreadRadius: 1,
+                                offset: Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // ── User row ──────────────────────────────────────────
+                              Row(
+                                children: [
+                                  CircleAvatar(
+                                    radius: 20,
+                                    backgroundColor: Colors.grey.shade200,
+                                    child: const Icon(
+                                      Icons.person,
+                                      color: Colors.grey,
+                                      size: 26,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Text(
+                                      r['username'] ?? 'User',
+                                      style: const TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ),
+                                  Row(
+                                    children: List.generate(
+                                      5,
+                                      (i) => Icon(
+                                        i < (r['rating'] ?? 0)
+                                            ? Icons.star
+                                            : Icons.star_border,
+                                        size: 18,
+                                        color: Colors.amber,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
 
-              /// NAME
-              Expanded(
-                child: Text(
-                  r['username'] ?? 'User',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
+                              const SizedBox(height: 10),
 
-              /// RATING
-              Row(
-                children: List.generate(
-                  5,
-                  (i) => Icon(
-                    i < (r['rating'] ?? 0)
-                        ? Icons.star
-                        : Icons.star_border,
-                    size: 18,
-                    color: Colors.amber,
-                  ),
-                ),
-              ),
-            ],
-          ),
+                              // ── User comment ──────────────────────────────────────
+                              Text(
+                                r['comment'] ?? '',
+                                style: const TextStyle(
+                                  fontSize: 14.5,
+                                  color: Colors.black87,
+                                  height: 1.4,
+                                ),
+                              ),
 
-          SizedBox(height: 10),
-
-          /// COMMENT
-          Text(
-            r['comment'] ?? '',
-            style: TextStyle(
-              fontSize: 14.5,
-              color: Colors.black87,
-              height: 1.4,
-            ),
-          ),
-        ],
-      ),
-    );
-  },
-),
-
+                              // ── Vendor reply ──────────────────────────────────────
+                              if (hasReply) ...[
+                                const SizedBox(height: 12),
+                                Container(
+                                  width: double.infinity,
+                                  padding: const EdgeInsets.all(12),
+                                  decoration: BoxDecoration(
+                                    color: Colors.blue.shade50,
+                                    borderRadius: BorderRadius.circular(10),
+                                    border: Border.all(
+                                      color: Colors.blue.shade100,
+                                    ),
+                                  ),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Row(
+                                        children: const [
+                                          Icon(
+                                            Icons.storefront,
+                                            size: 15,
+                                            color: Colors.blue,
+                                          ),
+                                          SizedBox(width: 4),
+                                          Text(
+                                            "Owner's Reply",
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 13,
+                                              color: Colors.blue,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 6),
+                                      Text(
+                                        r['reply'],
+                                        style: const TextStyle(
+                                          fontSize: 14,
+                                          height: 1.4,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ],
+                          ),
+                        );
+                      },
+                    ),
                   ],
                 ),
               );
